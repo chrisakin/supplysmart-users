@@ -5,6 +5,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import Layout from '../components/Layout';
 import PreLogin from '../pages/PreLogin';
 import Login from '../pages/Login';
+import ForgotPassword from '../pages/ForgotPassword';
 
 // Lazy load other pages that aren't part of the critical auth flow
 const Dashboard = lazy(() => import('../pages/Dashboard'));
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
       {
         path: 'login/:type',
         element: <Login />,
+      },
+      {
+        path: 'forgot-password/:type',
+        element: <ForgotPassword />,
       },
       {
         path: 'dashboard',

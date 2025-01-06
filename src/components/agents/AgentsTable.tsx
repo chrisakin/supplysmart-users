@@ -1,14 +1,23 @@
+import { useEffect } from 'react';
 import { useAgentsStore } from '../../store/agents';
 import { formatDate } from '../../lib/utils';
+import { Pagination } from '../ui/Pagination';
+import { usePagination } from '../../hooks/usePagination';
 
 export function AgentsTable() {
-  const { agents } = useAgentsStore();
+  const { agents, meta, loading, fetchAgents } = useAgentsStore();
+  const { page, setPage, getPaginationParams } = usePagination(10);
+
+  useEffect(() => {
+    fetchAgents(getPaginationParams());
+  }, [page, fetchAgents]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <div className="p-6 border-b">
         <h2 className="text-lg font-semibold">All Agents</h2>
       </div>
+      
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
@@ -45,6 +54,14 @@ export function AgentsTable() {
           </tbody>
         </table>
       </div>
+
+      {meta && (
+        <Pagination
+          currentPage={meta.currentPage}
+          totalPages={meta.lastPage}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }

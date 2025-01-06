@@ -1,6 +1,17 @@
 import { create } from 'zustand';
-import { AgentsState } from '../types/store';
-import { API_ENDPOINT } from '../lib/config';
+import api from '../lib/axios';
+import { PaginatedResponse, PaginationParams } from '../types/pagination';
+import { Agent, AgentStats } from '../types/store';
+
+interface AgentsState {
+  agents: Agent[];
+  stats: AgentStats;
+  meta: PaginatedResponse<Agent>['meta'] | null;
+  loading: boolean;
+  error: string | null;
+  fetchAgents: (params: PaginationParams) => Promise<void>;
+  fetchStats: () => Promise<void>;
+}
 
 export const useAgentsStore = create<AgentsState>((set) => ({
   agents: [],
@@ -9,24 +20,22 @@ export const useAgentsStore = create<AgentsState>((set) => ({
     activeAgents: 0,
     inactiveAgents: 0,
   },
+  meta: null,
   loading: false,
   error: null,
 
-  fetchAgents: async () => {
+  fetchAgents: async (params) => {
     try {
       set({ loading: true, error: null });
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${API_ENDPOINT}/agents`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const { data } = await api.get<PaginatedResponse<Agent>>('/agents', {
+        params,
       });
-
-      if (!response.ok) throw new Error('Failed to fetch agents');
       
-      const data = await response.json();
-      set({ agents: data, loading: false });
+      set({ 
+        agents: data.data,
+        meta: data.meta,
+        loading: false 
+      });
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to fetch agents',
@@ -38,18 +47,8 @@ export const useAgentsStore = create<AgentsState>((set) => ({
   fetchStats: async () => {
     try {
       set({ loading: true, error: null });
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${API_ENDPOINT}/agents/stats`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch agent stats');
-      
-      const data = await response.json();
-      set({ stats: data, loading: false });
+      const { data } = await api.get<{ stats: AgentStats }>('/agents/stats');
+      set({ stats: data.stats, loading: false });
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to fetch agent stats',

@@ -1,6 +1,7 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { AgentLoginForm } from '../components/auth/AgentLoginForm';
 import { AggregatorLoginForm } from '../components/auth/AggregatorLoginForm';
+import { BackButton } from '../components/ui/BackButton';
 import { images } from '../assets';
 
 type LoginType = 'agent' | 'aggregator';
@@ -17,6 +18,10 @@ export default function Login() {
   
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="p-4">
+        <BackButton to="/" />
+      </div>
+      
       <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="flex justify-center">

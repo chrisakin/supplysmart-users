@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Phone, Lock } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { validatePhoneNumber, validatePin } from '../../lib/validation';
 
@@ -8,6 +9,7 @@ export function AgentLoginForm() {
   const [pin, setPin] = useState('');
   const [touched, setTouched] = useState({ phone: false, pin: false });
   const { login, loading, error } = useAuth();
+  const navigate = useNavigate();
 
   const isPhoneValid = validatePhoneNumber(phoneNumber);
   const isPinValid = validatePin(pin);
@@ -75,6 +77,15 @@ export function AgentLoginForm() {
         {touched.pin && !isPinValid && (
           <p className="mt-1 text-sm text-red-500">PIN must be exactly 6 digits</p>
         )}
+      </div>
+
+      <div className="flex items-center justify-end">
+        <Link 
+          to="/forgot-password/agent"
+          className="text-sm text-emerald-600 hover:text-emerald-700"
+        >
+          Forgot PIN?
+        </Link>
       </div>
 
       <button

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Mail, Lock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { validateEmail, validatePassword } from '../../lib/validation';
 
@@ -74,6 +75,15 @@ export function AggregatorLoginForm() {
         {touched.password && !isPasswordValid && (
           <p className="mt-1 text-sm text-red-500">Password must be at least 6 characters</p>
         )}
+      </div>
+
+      <div className="flex items-center justify-end">
+        <Link 
+          to="/forgot-password/aggregator"
+          className="text-sm text-emerald-600 hover:text-emerald-700"
+        >
+          Forgot password?
+        </Link>
       </div>
 
       <button

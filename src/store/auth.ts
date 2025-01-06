@@ -1,6 +1,21 @@
 import { create } from 'zustand';
-import { AuthState } from '../types/store';
 import { authApi } from '../lib/api/auth';
+
+interface User {
+  id: string;
+  email?: string;
+  phoneNumber?: string;
+  type: 'agent' | 'aggregator';
+}
+
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  loading: boolean;
+  error: string | null;
+  login: (type: 'agent' | 'aggregator', credentials: any) => Promise<void>;
+  logout: () => void;
+}
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
@@ -8,14 +23,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   loading: false,
   error: null,
 
-  login: async (type, email, password) => {
+  login: async (type, credentials) => {
     try {
       set({ loading: true, error: null });
-      const response = await authApi.login(type, { email, password });
+      const response = await authApi.login(type, credentials);
       
       localStorage.setItem('token', response.token);
       set({ 
-        user: { ...response.user, type },
+        user: response.user,
         token: response.token,
         loading: false 
       });

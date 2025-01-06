@@ -5,12 +5,14 @@ export function useAuth() {
   const navigate = useNavigate();
   const { login, loading, error } = useAuthStore();
 
-  const handleLogin = async (type: 'agent' | 'aggregator', email: string, password: string) => {
+  const handleLogin = async (
+    type: 'agent' | 'aggregator',
+    credentials: { email?: string; password?: string; phoneNumber?: string; pin?: string }
+  ) => {
     try {
-      await login(type, email, password);
+      await login(type, credentials);
       navigate('/dashboard');
     } catch (err) {
-      // Error is already handled in the store
       console.error('Login failed:', err);
     }
   };
