@@ -3,38 +3,43 @@ import { authApi } from '../lib/api/auth';
 
 interface User {
   id: string;
-  email?: string;
-  phoneNumber?: string;
   type: 'agent' | 'aggregator';
 }
 
 interface AuthState {
   user: User | null;
   token: string | null;
+  refreshToken: string | null;
   loading: boolean;
   error: string | null;
-  login: (type: 'agent' | 'aggregator', credentials: any) => Promise<{ requiresVerification?: boolean }>;
+  login: (type: 'agent' | 'aggregator', credentials: any) => Promise<void>;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: localStorage.getItem('token'),
+  refreshToken: localStorage.getItem('refreshToken'),
   loading: false,
   error: null,
 
-  login: async (type: 'agent' | 'aggregator', credentials: { email: string; password: string } | { phoneNumber: string; pin: string }): Promise<{ requiresVerification?: boolean }> => {
+  login: async (type, credentials) => {
     try {
       set({ loading: true, error: null });
       const response = await authApi.login(type, credentials);
       
-      localStorage.setItem('token', response.token);
+      const { token, refreshToken, ['agentId or aggregatorId']: id } = response.data;
+      
+      localStorage.setItem('token', token);
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('userType', type);
+      
       set({ 
-        user: response.user,
-        token: response.token,
+        user: { id, type },
+        token,
+        refreshToken,
         loading: false 
       });
-      return { requiresVerification: response.requiresVerification };
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : 'Login failed',
@@ -46,6 +51,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: () => {
     localStorage.removeItem('token');
-    set({ user: null, token: null });
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userType');
+    set({ user: null, token: null, refreshToken: null });
   },
 }));

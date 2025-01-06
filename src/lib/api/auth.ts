@@ -1,14 +1,12 @@
 import api from '../axios';
 
 interface LoginResponse {
-  token: string;
-  user: {
-    id: string;
-    email?: string;
-    phoneNumber?: string;
-    type: 'agent' | 'aggregator';
+  status: string;
+  data: {
+    token: string;
+    refreshToken: string;
+    'agentId or aggregatorId': string;
   };
-  requiresVerification?: boolean;
 }
 
 interface SignupResponse {
@@ -16,22 +14,23 @@ interface SignupResponse {
   requiresVerification: boolean;
 }
 
-interface AgentLoginCredentials {
+interface LoginCredentials {
   phoneNumber: string;
   pin: string;
-}
-
-interface AggregatorLoginCredentials {
-  email: string;
-  password: string;
 }
 
 export const authApi = {
   login: async (
     type: 'agent' | 'aggregator',
-    credentials: AgentLoginCredentials | AggregatorLoginCredentials
+    credentials: LoginCredentials
   ): Promise<LoginResponse> => {
     const { data } = await api.post(`/${type}s/login`, credentials);
+    return data;
+  },
+
+  refreshToken: async (type: 'agent' | 'aggregator') => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    const { data } = await api.post(`/${type}s/refresh/token`, { refreshToken });
     return data;
   },
 

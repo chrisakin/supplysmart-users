@@ -8,15 +8,11 @@ export function useAuth() {
 
   const handleLogin = async (
     type: 'agent' | 'aggregator',
-    credentials: { email?: string; password?: string; phoneNumber?: string; pin?: string }
+    credentials: { phoneNumber: string; pin: string }
   ) => {
     try {
-      const response: { requiresVerification?: boolean } = await storeLogin(type, credentials);
-      if (response?.requiresVerification) {
-        navigate('/verify-email', { state: { email: credentials.email, type } });
-      } else {
-        navigate(`/${type}/dashboard`);
-      }
+      await storeLogin(type, credentials);
+      navigate(`/${type}/dashboard`);
     } catch (err) {
       console.error('Login failed:', err);
       throw err;
@@ -36,15 +32,10 @@ export function useAuth() {
         navigate('/verify-email', { state: { email, type } });
       } else {
         // If no verification required, log the user in directly
-        const credentials = type === 'agent' 
-          ? {
-              phoneNumber: formData.get('phoneNumber') as string,
-              pin: formData.get('pin') as string
-            }
-          : {
-              email: formData.get('email') as string,
-              password: formData.get('password') as string
-            };
+        const credentials = {
+          phoneNumber: formData.get('phoneNumber') as string,
+          pin: formData.get('pin') as string
+        };
         
         await handleLogin(type, credentials);
       }
