@@ -28,7 +28,7 @@ export function useAuth() {
     formData: FormData
   ) => {
     try {
-      const response: { requiresVerification?: boolean } = await authApi.signup(type, formData);
+      const response: { requiresVerification?: boolean  } = await authApi.signup(type, formData);
       
       // If email verification is required
       if (response.requiresVerification) {
