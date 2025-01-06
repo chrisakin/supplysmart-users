@@ -18,21 +18,21 @@ export interface MenuItem {
 }
 
 export const agentMenu: MenuItem[] = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-  { icon: Clock, label: 'Terminals', href: '/dashboard/terminals' },
-  { icon: Receipt, label: 'Transactions', href: '/dashboard/transactions' },
-  { icon: Wallet, label: 'Wallet', href: '/dashboard/wallet' },
-  { icon: CreditCard, label: 'Payment', href: '/dashboard/payment' },
-  { icon: MessageSquare, label: 'Feedback', href: '/dashboard/feedback' },
-  { icon: FileBarChart, label: 'Report', href: '/dashboard/report' },
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/agent/dashboard' },
+  { icon: Clock, label: 'Terminals', href: '/agent/terminals' },
+  { icon: Receipt, label: 'Transactions', href: '/agent/transactions' },
+  { icon: Wallet, label: 'Wallet', href: '/agent/wallet' },
+  { icon: CreditCard, label: 'Payment', href: '/agent/payment' },
+  { icon: MessageSquare, label: 'Feedback', href: '/agent/feedback' },
+  { icon: FileBarChart, label: 'Report', href: '/agent/report' },
 ];
 
 export const aggregatorMenu: MenuItem[] = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-  { icon: Users, label: 'Agents', href: '/dashboard/agents' },
-  { icon: Receipt, label: 'Transactions', href: '/dashboard/transactions' },
-  { icon: ListChecks, label: 'Listings', href: '/dashboard/listings' },
-  { icon: CreditCard, label: 'Payment', href: '/dashboard/payment' },
-  { icon: MessageSquare, label: 'Feedback', href: '/dashboard/feedback' },
-  { icon: FileBarChart, label: 'Report', href: '/dashboard/report' },
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/aggregator/dashboard' },
+  { icon: Users, label: 'Agents', href: '/aggregator/agents' },
+  { icon: Receipt, label: 'Transactions', href: '/aggregator/transactions' },
+  { icon: ListChecks, label: 'Listings', href: '/aggregator/listings' },
+  { icon: CreditCard, label: 'Payment', href: '/aggregator/payment' },
+  { icon: MessageSquare, label: 'Feedback', href: '/aggregator/feedback' },
+  { icon: FileBarChart, label: 'Report', href: '/aggregator/report' },
 ];

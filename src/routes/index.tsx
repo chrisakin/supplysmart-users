@@ -1,14 +1,17 @@
 import { lazy } from 'react';
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { RootLayout } from '../components/RootLayout';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import Layout from '../components/Layout';
 import PreLogin from '../pages/PreLogin';
 import Login from '../pages/Login';
 import ForgotPassword from '../pages/ForgotPassword';
+import { PrivateRoute } from '../components/PrivateRoute';
 
-// Lazy load other pages that aren't part of the critical auth flow
-const Dashboard = lazy(() => import('../pages/Dashboard'));
+// Lazy load pages
+const AgentDashboard = lazy(() => import('../pages/agent/Dashboard'));
+const AggregatorDashboard = lazy(() => import('../pages/aggregator/Dashboard'));
+const Agents = lazy(() => import('../pages/Agents'));
 const Terminals = lazy(() => import('../pages/Terminals'));
 const Transactions = lazy(() => import('../pages/Transactions'));
 const Wallets = lazy(() => import('../pages/Wallets'));
@@ -33,12 +36,29 @@ export const router = createBrowserRouter([
         path: 'forgot-password/:type',
         element: <ForgotPassword />,
       },
+      // Agent Routes
       {
-        path: 'dashboard',
-        element: <Layout />,
+        path: 'agent',
+        element: <PrivateRoute userType="agent"><Layout /></PrivateRoute>,
         children: [
-          { index: true, element: <Dashboard /> },
+          { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: 'dashboard', element: <AgentDashboard /> },
           { path: 'terminals', element: <Terminals /> },
+          { path: 'transactions', element: <Transactions /> },
+          { path: 'wallets', element: <Wallets /> },
+          { path: 'payment', element: <Payment /> },
+          { path: 'feedback', element: <Feedback /> },
+          { path: 'reports', element: <Reports /> },
+        ],
+      },
+      // Aggregator Routes
+      {
+        path: 'aggregator',
+        element: <PrivateRoute userType="aggregator"><Layout /></PrivateRoute>,
+        children: [
+          { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: 'dashboard', element: <AggregatorDashboard /> },
+          { path: 'agents', element: <Agents /> },
           { path: 'transactions', element: <Transactions /> },
           { path: 'wallets', element: <Wallets /> },
           { path: 'payment', element: <Payment /> },

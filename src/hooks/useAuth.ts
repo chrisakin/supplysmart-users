@@ -11,7 +11,7 @@ export function useAuth() {
   ) => {
     try {
       await login(type, credentials);
-      navigate('/dashboard');
+      navigate(`/${type}/dashboard`);
     } catch (err) {
       console.error('Login failed:', err);
     }

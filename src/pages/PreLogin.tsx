@@ -14,10 +14,10 @@ export default function PreLogin() {
               <img src={images.logo} alt="SupplySmart" className="h-8 w-auto" />
             </div>
             <div className="flex items-center gap-6">
-              <Link to="/login/agent" className="text-gray-600 hover:text-gray-900">
+              <Link to="/signup/agent" className="text-gray-600 hover:text-gray-900">
                 Become an Agent
               </Link>
-              <Link to="/login/aggregator" className="text-gray-600 hover:text-gray-900">
+              <Link to="/signup/aggregator" className="text-gray-600 hover:text-gray-900">
                 Become an Aggregator
               </Link>
               <button 
@@ -31,6 +31,7 @@ export default function PreLogin() {
         </div>
       </nav>
 
+      {/* Rest of the component remains the same */}
       <div className="flex min-h-[calc(100vh-64px)]">
         <div className="hidden lg:flex w-1/2 bg-[#1fc18833] items-center justify-center relative">
           <div className="absolute inset-0 flex items-start justify-center z-10 pt-20">
@@ -63,20 +64,20 @@ export default function PreLogin() {
                 Choose your preferred service
               </h2>
               <div className="space-y-4">
-                <button
-                  onClick={() => navigate('/login/agent')}
+                <Link
+                  to="/signup/agent"
                   className="flex items-center justify-between w-full px-6 py-4 border-2 border-emerald-500 rounded-xl text-emerald-500 hover:bg-emerald-50 transition-all duration-200 group hover:shadow-md"
                 >
-                  <span className="font-medium">Login as agent</span>
+                  <span className="font-medium">Sign up as agent</span>
                   <Box className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1 duration-200" />
-                </button>
-                <button
-                  onClick={() => navigate('/login/aggregator')}
+                </Link>
+                <Link
+                  to="/signup/aggregator"
                   className="flex items-center justify-between w-full px-6 py-4 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all duration-200 group hover:shadow-md"
                 >
-                  <span className="font-medium">Login as aggregator</span>
+                  <span className="font-medium">Sign up as aggregator</span>
                   <Box className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1 duration-200" />
-                </button>
+                </Link>
               </div>
             </div>
           </div>
