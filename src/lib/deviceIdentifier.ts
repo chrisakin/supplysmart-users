@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 } from 'uuid';
 
 const DEVICE_ID_KEY = 'supplysmart_device_id';
 
@@ -6,7 +6,7 @@ export function getDeviceIdentifier(): string {
   let deviceId = localStorage.getItem(DEVICE_ID_KEY);
   
   if (!deviceId) {
-    deviceId = uuidv4();
+    deviceId = v4();
     localStorage.setItem(DEVICE_ID_KEY, deviceId);
   }
   

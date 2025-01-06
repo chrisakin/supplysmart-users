@@ -1,19 +1,20 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Upload } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { validateEmail, validatePassword, validatePhoneNumber, validatePin } from '../../lib/validation';
 import { LocationSelect } from '../forms/LocationSelect';
+import { getFCMToken } from '../../lib/firebase';
+import { getDeviceIdentifier } from '../../lib/deviceIdentifier';
 
 interface SignupFormProps {
   type: 'agent' | 'aggregator';
 }
 
 export function SignupForm({ type }: SignupFormProps) {
-  const navigate = useNavigate();
   const { signup, loading } = useAuth();
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     phoneNumber: '',
     email: '',
     state: '',
@@ -42,26 +43,38 @@ export function SignupForm({ type }: SignupFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
     try {
       const formDataObj = new FormData();
+      
+      // Add all form fields to FormData except password for agents
       Object.entries(formData).forEach(([key, value]) => {
-        if (value instanceof File) {
+        if (value !== null) {
+          // Skip password field for agents
+          if (type === 'agent' && key === 'password') return;
+          // Skip pin field for aggregators
+          if (type === 'aggregator' && key === 'pin') return;
           formDataObj.append(key, value);
-        } else {
-          formDataObj.append(key, String(value));
         }
       });
 
+      // Add FCM token and device identifier
+      const fcmToken = await getFCMToken();
+      const deviceIdentifier = getDeviceIdentifier();
+      
+      formDataObj.append('fcmToken', fcmToken);
+      formDataObj.append('deviceIdentifier', deviceIdentifier);
+
       await signup(type, formDataObj);
-      navigate('/verify-email', { state: { email: formData.email, type } });
     } catch (err) {
-      console.error('Signup failed:', err);
+      setError(err instanceof Error ? err.message : 'Signup failed. Please try again.');
     }
   };
 
   const isFormValid = () => {
     const baseValidation = 
-      formData.fullName &&
+      formData.name &&
       validatePhoneNumber(formData.phoneNumber) &&
       validateEmail(formData.email) &&
       formData.state &&
@@ -76,7 +89,7 @@ export function SignupForm({ type }: SignupFormProps) {
     return baseValidation && validatePassword(formData.password);
   };
 
-   return (
+  return (
     <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm max-w-2xl mx-auto w-full">
       <h2 className="text-xl font-semibold text-gray-900 mb-6">
         Complete the {type} Details
@@ -84,17 +97,17 @@ export function SignupForm({ type }: SignupFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             Full Name
           </label>
           <input
-            id="fullName"
+            id="name"
             type="text"
-            name="fullName"
+            name="name"
             placeholder="Enter your full name"
-            value={formData.fullName}
+            value={formData.name}
             onChange={handleInputChange}
-            onBlur={() => handleBlur('fullName')}
+            onBlur={() => handleBlur('name')}
             className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             required
           />
