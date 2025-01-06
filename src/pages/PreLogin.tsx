@@ -49,7 +49,7 @@ export default function PreLogin() {
         </div>
 
         <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-4">
-          <div className="max-w-md w-full">
+          <div className="max-w-lg w-full">
             <div className="lg:hidden text-center mb-12">
               <h1 className="text-3xl sm:text-4xl font-bold mb-4">
                 We go wherever you lead us
@@ -59,7 +59,7 @@ export default function PreLogin() {
               </p>
             </div>
 
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100">
+            <div className="bg-white rounded-xl p-8 shadow-md border border-gray-100">
               <h2 className="text-2xl font-semibold text-center mb-8">
                 Choose your preferred service
               </h2>

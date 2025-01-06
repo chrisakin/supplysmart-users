@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useParams, Navigate, Link } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { SignupForm } from '../components/auth/SignupForm';
 import { SignupBenefits } from '../components/auth/SignupBenefits';
 import { BackButton } from '../components/ui/BackButton';
@@ -18,7 +17,7 @@ export default function Signup() {
         <BackButton to="/" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-center mb-8">
           <img src={images.logo} alt="SupplySmart" className="h-12 w-auto" />
         </div>
