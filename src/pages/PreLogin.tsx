@@ -65,17 +65,17 @@ export default function PreLogin() {
               </h2>
               <div className="space-y-4">
                 <Link
-                  to="/signup/agent"
+                  to="/login/agent"
                   className="flex items-center justify-between w-full px-6 py-4 border-2 border-emerald-500 rounded-xl text-emerald-500 hover:bg-emerald-50 transition-all duration-200 group hover:shadow-md"
                 >
-                  <span className="font-medium">Sign up as agent</span>
+                  <span className="font-medium">Sign in as agent</span>
                   <Box className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1 duration-200" />
                 </Link>
                 <Link
-                  to="/signup/aggregator"
+                  to="/login/aggregator"
                   className="flex items-center justify-between w-full px-6 py-4 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all duration-200 group hover:shadow-md"
                 >
-                  <span className="font-medium">Sign up as aggregator</span>
+                  <span className="font-medium">Sign in as aggregator</span>
                   <Box className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1 duration-200" />
                 </Link>
               </div>

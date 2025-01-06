@@ -25,12 +25,12 @@ export const authApi = {
     type: 'agent' | 'aggregator',
     credentials: AgentLoginCredentials | AggregatorLoginCredentials
   ): Promise<LoginResponse> => {
-    const { data } = await api.post(`/v1/${type}s/login`, credentials);
+    const { data } = await api.post(`${type}s/login`, credentials);
     return data;
   },
 
   forgotPassword: async (email: string, type: 'agent' | 'aggregator') => {
-    const { data } = await api.post(`/v1/${type}s/forgot-password`, { email });
+    const { data } = await api.post(`${type}s/forgot-password`, { email });
     return data;
   },
 };

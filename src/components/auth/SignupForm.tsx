@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Upload } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { validateEmail, validatePassword, validatePhoneNumber } from '../../lib/validation';
+import { LocationSelect } from '../forms/LocationSelect';
 
 interface SignupFormProps {
   type: 'agent' | 'aggregator';
@@ -63,134 +64,161 @@ export function SignupForm({ type }: SignupFormProps) {
   };
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm max-w-xl mx-auto lg:mx-0 w-full">
+    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm max-w-2xl mx-auto w-full">
       <h2 className="text-xl font-semibold text-gray-900 mb-6">
         Complete the {type} Details
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <input
-            type="text"
-            name="fullName"
-            placeholder="Full Name"
-            value={formData.fullName}
-            onChange={handleInputChange}
-            onBlur={() => handleBlur('fullName')}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            required
-          />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+              Full Name
+            </label>
+            <input
+              id="fullName"
+              type="text"
+              name="fullName"
+              placeholder="Enter your full name"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('fullName')}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number
+            </label>
+            <input
+              id="phoneNumber"
+              type="tel"
+              name="phoneNumber"
+              placeholder="e.g. 08012345678"
+              value={formData.phoneNumber}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('phoneNumber')}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+            {touched.phoneNumber && !validatePhoneNumber(formData.phoneNumber) && (
+              <p className="mt-1 text-sm text-red-500">Please enter a valid Nigerian phone number</p>
+            )}
+          </div>
+        </div>
+
+        <LocationSelect
+          state={formData.state}
+          city={formData.city}
+          onStateChange={(state) => setFormData(prev => ({ ...prev, state, city: '' }))}
+          onCityChange={(city) => setFormData(prev => ({ ...prev, city }))}
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('email')}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+            {touched.email && !validateEmail(formData.email) && (
+              <p className="mt-1 text-sm text-red-500">Please enter a valid email address</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="bvn" className="block text-sm font-medium text-gray-700 mb-1">
+              BVN
+            </label>
+            <input
+              id="bvn"
+              type="text"
+              name="bvn"
+              placeholder="Enter your BVN"
+              value={formData.bvn}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('bvn')}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+          </div>
         </div>
 
         <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
           <input
-            type="tel"
-            name="phoneNumber"
-            placeholder="Phone number"
-            value={formData.phoneNumber}
-            onChange={handleInputChange}
-            onBlur={() => handleBlur('phoneNumber')}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="state"
-            placeholder="State"
-            value={formData.state}
-            onChange={handleInputChange}
-            onBlur={() => handleBlur('state')}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            required
-          />
-          <input
-            type="text"
-            name="city"
-            placeholder="City"
-            value={formData.city}
-            onChange={handleInputChange}
-            onBlur={() => handleBlur('city')}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            required
-          />
-        </div>
-
-        <div>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email address"
-            value={formData.email}
-            onChange={handleInputChange}
-            onBlur={() => handleBlur('email')}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            required
-          />
-        </div>
-
-        <div>
-          <input
-            type="text"
-            name="bvn"
-            placeholder="BVN"
-            value={formData.bvn}
-            onChange={handleInputChange}
-            onBlur={() => handleBlur('bvn')}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            required
-          />
-        </div>
-
-        <div>
-          <input
+            id="password"
             type="password"
             name="password"
-            placeholder="Password"
+            placeholder="Create a password"
             value={formData.password}
             onChange={handleInputChange}
             onBlur={() => handleBlur('password')}
             className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             required
           />
+          {touched.password && !validatePassword(formData.password) && (
+            <p className="mt-1 text-sm text-red-500">Password must be at least 6 characters</p>
+          )}
         </div>
 
-        <div className="space-y-4">
-          <label className="block">
-            <div className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-gray-300 cursor-pointer hover:bg-gray-50">
-              <span className="text-gray-500">
-                {formData.proofOfAddress ? formData.proofOfAddress.name : 'Proof of Address (Utility bills)'}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block">
+              <span className="block text-sm font-medium text-gray-700 mb-1">
+                Proof of Address
               </span>
-              <Upload className="w-5 h-5 text-gray-400" />
-            </div>
-            <input
-              type="file"
-              name="proofOfAddress"
-              onChange={handleInputChange}
-              className="hidden"
-              accept=".jpg,.jpeg,.png,.pdf"
-              required
-            />
-          </label>
+              <div className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-gray-300 cursor-pointer hover:bg-gray-50">
+                <span className="text-gray-500">
+                  {formData.proofOfAddress ? formData.proofOfAddress.name : 'Upload utility bill'}
+                </span>
+                <Upload className="w-5 h-5 text-gray-400" />
+              </div>
+              <input
+                type="file"
+                name="proofOfAddress"
+                onChange={handleInputChange}
+                className="hidden"
+                accept=".jpg,.jpeg,.png,.pdf"
+                required
+              />
+            </label>
+          </div>
 
-          <label className="block">
-            <div className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-gray-300 cursor-pointer hover:bg-gray-50">
-              <span className="text-gray-500">
-                {formData.passportPhoto ? formData.passportPhoto.name : 'Passport Photo'}
+          <div>
+            <label className="block">
+              <span className="block text-sm font-medium text-gray-700 mb-1">
+                Passport Photo
               </span>
-              <Upload className="w-5 h-5 text-gray-400" />
-            </div>
-            <input
-              type="file"
-              name="passportPhoto"
-              onChange={handleInputChange}
-              className="hidden"
-              accept=".jpg,.jpeg,.png"
-              required
-            />
-          </label>
+              <div className="flex items-center justify-between px-4 py-2.5 rounded-lg border border-gray-300 cursor-pointer hover:bg-gray-50">
+                <span className="text-gray-500">
+                  {formData.passportPhoto ? formData.passportPhoto.name : 'Upload passport photo'}
+                </span>
+                <Upload className="w-5 h-5 text-gray-400" />
+              </div>
+              <input
+                type="file"
+                name="passportPhoto"
+                onChange={handleInputChange}
+                className="hidden"
+                accept=".jpg,.jpeg,.png"
+                required
+              />
+            </label>
+          </div>
         </div>
 
         <div className="flex items-start mt-6">
@@ -201,9 +229,9 @@ export function SignupForm({ type }: SignupFormProps) {
             required
           />
           <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-            I acknowledge that have read and do hereby accept the terms and conditions in the secsystem{' '}
+            I acknowledge that I have read and accept the{' '}
             <a href="#" className="text-emerald-500 hover:text-emerald-600">
-              Terms Of Use Merchant Agreement
+              Terms of Use
             </a>{' '}
             and{' '}
             <a href="#" className="text-emerald-500 hover:text-emerald-600">
@@ -215,9 +243,9 @@ export function SignupForm({ type }: SignupFormProps) {
         <button
           type="submit"
           disabled={loading || !isFormValid()}
-          className="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+          className="w-full bg-emerald-500 text-white py-3 rounded-lg hover:bg-emerald-600 focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
         >
-          {loading ? 'Creating Account...' : 'Continue'}
+          {loading ? 'Creating Account...' : 'Create Account'}
         </button>
       </form>
     </div>

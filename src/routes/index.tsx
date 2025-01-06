@@ -5,6 +5,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import Layout from '../components/Layout';
 import PreLogin from '../pages/PreLogin';
 import Login from '../pages/Login';
+import Signup from '../pages/Signup';
 import ForgotPassword from '../pages/ForgotPassword';
 import { PrivateRoute } from '../components/PrivateRoute';
 
@@ -31,6 +32,10 @@ export const router = createBrowserRouter([
       {
         path: 'login/:type',
         element: <Login />,
+      },
+      {
+        path: 'signup/:type',
+        element: <Signup />,
       },
       {
         path: 'forgot-password/:type',
