@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { validateEmail, validatePassword, validatePhoneNumber } from '../../lib/validation';
+import { validateEmail, validatePassword, validatePhoneNumber, validatePin } from '../../lib/validation';
 import { LocationSelect } from '../forms/LocationSelect';
 
 interface SignupFormProps {
@@ -15,10 +15,11 @@ export function SignupForm({ type }: SignupFormProps) {
   const [formData, setFormData] = useState({
     fullName: '',
     phoneNumber: '',
+    email: '',
     state: '',
     city: '',
-    email: '',
     bvn: '',
+    pin: '',
     password: '',
     proofOfAddress: null as File | null,
     passportPhoto: null as File | null,
@@ -50,17 +51,20 @@ export function SignupForm({ type }: SignupFormProps) {
   };
 
   const isFormValid = () => {
-    return (
+    const baseValidation = 
       formData.fullName &&
       validatePhoneNumber(formData.phoneNumber) &&
+      validateEmail(formData.email) &&
       formData.state &&
       formData.city &&
-      validateEmail(formData.email) &&
       formData.bvn &&
-      validatePassword(formData.password) &&
       formData.proofOfAddress &&
-      formData.passportPhoto
-    );
+      formData.passportPhoto;
+
+    if (type === 'agent') {
+      return baseValidation && validatePin(formData.pin);
+    }
+    return baseValidation && validatePassword(formData.password);
   };
 
   return (
@@ -70,43 +74,61 @@ export function SignupForm({ type }: SignupFormProps) {
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
-            </label>
-            <input
-              id="fullName"
-              type="text"
-              name="fullName"
-              placeholder="Enter your full name"
-              value={formData.fullName}
-              onChange={handleInputChange}
-              onBlur={() => handleBlur('fullName')}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              required
-            />
-          </div>
+        <div>
+          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+            Full Name
+          </label>
+          <input
+            id="fullName"
+            type="text"
+            name="fullName"
+            placeholder="Enter your full name"
+            value={formData.fullName}
+            onChange={handleInputChange}
+            onBlur={() => handleBlur('fullName')}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            required
+          />
+        </div>
 
-          <div>
-            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number
-            </label>
-            <input
-              id="phoneNumber"
-              type="tel"
-              name="phoneNumber"
-              placeholder="e.g. 08012345678"
-              value={formData.phoneNumber}
-              onChange={handleInputChange}
-              onBlur={() => handleBlur('phoneNumber')}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              required
-            />
-            {touched.phoneNumber && !validatePhoneNumber(formData.phoneNumber) && (
-              <p className="mt-1 text-sm text-red-500">Please enter a valid Nigerian phone number</p>
-            )}
-          </div>
+        <div>
+          <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+            Phone Number
+          </label>
+          <input
+            id="phoneNumber"
+            type="tel"
+            name="phoneNumber"
+            placeholder="e.g. 08012345678"
+            value={formData.phoneNumber}
+            onChange={handleInputChange}
+            onBlur={() => handleBlur('phoneNumber')}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            required
+          />
+          {touched.phoneNumber && !validatePhoneNumber(formData.phoneNumber) && (
+            <p className="mt-1 text-sm text-red-500">Please enter a valid Nigerian phone number</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email Address
+          </label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            value={formData.email}
+            onChange={handleInputChange}
+            onBlur={() => handleBlur('email')}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            required
+          />
+          {touched.email && !validateEmail(formData.email) && (
+            <p className="mt-1 text-sm text-red-500">Please enter a valid email address</p>
+          )}
         </div>
 
         <LocationSelect
@@ -116,64 +138,65 @@ export function SignupForm({ type }: SignupFormProps) {
           onCityChange={(city) => setFormData(prev => ({ ...prev, city }))}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleInputChange}
-              onBlur={() => handleBlur('email')}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              required
-            />
-            {touched.email && !validateEmail(formData.email) && (
-              <p className="mt-1 text-sm text-red-500">Please enter a valid email address</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="bvn" className="block text-sm font-medium text-gray-700 mb-1">
-              BVN
-            </label>
-            <input
-              id="bvn"
-              type="text"
-              name="bvn"
-              placeholder="Enter your BVN"
-              value={formData.bvn}
-              onChange={handleInputChange}
-              onBlur={() => handleBlur('bvn')}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              required
-            />
-          </div>
-        </div>
-
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            Password
+          <label htmlFor="bvn" className="block text-sm font-medium text-gray-700 mb-1">
+            BVN
           </label>
           <input
-            id="password"
-            type="password"
-            name="password"
-            placeholder="Create a password"
-            value={formData.password}
+            id="bvn"
+            type="text"
+            name="bvn"
+            placeholder="Enter your BVN"
+            value={formData.bvn}
             onChange={handleInputChange}
-            onBlur={() => handleBlur('password')}
+            onBlur={() => handleBlur('bvn')}
             className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             required
           />
-          {touched.password && !validatePassword(formData.password) && (
-            <p className="mt-1 text-sm text-red-500">Password must be at least 6 characters</p>
-          )}
         </div>
+
+        {type === 'agent' ? (
+          <div>
+            <label htmlFor="pin" className="block text-sm font-medium text-gray-700 mb-1">
+              PIN
+            </label>
+            <input
+              id="pin"
+              type="password"
+              name="pin"
+              maxLength={6}
+              placeholder="Create a 6-digit PIN"
+              value={formData.pin}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('pin')}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+            {touched.pin && !validatePin(formData.pin) && (
+              <p className="mt-1 text-sm text-red-500">PIN must be exactly 6 digits</p>
+            )}
+          </div>
+        ) : (
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              placeholder="Create a password"
+              value={formData.password}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('password')}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+            {touched.password && !validatePassword(formData.password) && (
+              <p className="mt-1 text-sm text-red-500">Password must be at least 6 characters</p>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
