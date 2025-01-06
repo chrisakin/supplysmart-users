@@ -17,5 +17,17 @@ export function useAuth() {
     }
   };
 
-  return { login: handleLogin, loading, error };
+  const handleSignup = async (
+    type: 'agent' | 'aggregator',
+    formData: { fullName: string; phoneNumber: string; email: string; state: string; city: string; bvn: string; pin: string; password: string; proofOfAddress: File | null; passportPhoto: File | null; }
+  ) => {
+    try {
+      // Perform signup logic here
+      navigate(`/${type}/dashboard`);
+    } catch (err) {
+      console.error('Signup failed:', err);
+    }
+  };
+
+  return { login: handleLogin, signup: handleSignup, loading, error };
 }

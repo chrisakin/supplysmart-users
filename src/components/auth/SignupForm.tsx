@@ -43,8 +43,17 @@ export function SignupForm({ type }: SignupFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signup(type, formData);
-      navigate(`/${type}/dashboard`);
+      const formDataObj = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value instanceof File) {
+          formDataObj.append(key, value);
+        } else {
+          formDataObj.append(key, String(value));
+        }
+      });
+
+      await signup(type, formDataObj);
+      navigate('/verify-email', { state: { email: formData.email, type } });
     } catch (err) {
       console.error('Signup failed:', err);
     }
@@ -67,7 +76,7 @@ export function SignupForm({ type }: SignupFormProps) {
     return baseValidation && validatePassword(formData.password);
   };
 
-  return (
+   return (
     <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm max-w-2xl mx-auto w-full">
       <h2 className="text-xl font-semibold text-gray-900 mb-6">
         Complete the {type} Details

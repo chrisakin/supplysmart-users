@@ -7,6 +7,7 @@ import PreLogin from '../pages/PreLogin';
 import Login from '../pages/Login';
 import Signup from '../pages/Signup';
 import ForgotPassword from '../pages/ForgotPassword';
+import EmailVerificationPage from '../pages/EmailVerificationPage';
 import { PrivateRoute } from '../components/PrivateRoute';
 
 // Lazy load pages
@@ -36,6 +37,10 @@ export const router = createBrowserRouter([
       {
         path: 'signup/:type',
         element: <Signup />,
+      },
+      {
+        path: 'verify-email',
+        element: <EmailVerificationPage />,
       },
       {
         path: 'forgot-password/:type',

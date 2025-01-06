@@ -29,6 +29,16 @@ export const authApi = {
     return data;
   },
 
+  signup: async (type: 'agent' | 'aggregator', formData: FormData) => {
+    const { data } = await api.post(`${type}s/signup`, formData);
+    return data;
+  },
+
+  verifyEmail: async (type: 'agent' | 'aggregator', otp: string) => {
+    const { data } = await api.post(`${type}s/auth/verify/${otp}`);
+    return data;
+  },
+
   forgotPassword: async (email: string, type: 'agent' | 'aggregator') => {
     const { data } = await api.post(`${type}s/forgot-password`, { email });
     return data;
