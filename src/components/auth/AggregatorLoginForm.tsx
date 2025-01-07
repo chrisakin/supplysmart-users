@@ -43,7 +43,7 @@ export function AggregatorLoginForm() {
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             onBlur={() => setTouched(prev => ({ ...prev, phone: true }))}
-            placeholder="e.g. 08168622222"
+            placeholder="e.g. 08168XXXXXX"
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             required
           />
