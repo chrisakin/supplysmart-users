@@ -1,5 +1,7 @@
-import { CreditCard, CheckCircle2, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { CreditCard, CheckCircle2, XCircle, Plus } from 'lucide-react';
 import { StatCard } from '../components/ui/StatCards';
+import { PaymentModal } from '../components/payments/PaymentModal';
 
 interface PaymentData {
   id: string;
@@ -25,6 +27,8 @@ const payments: PaymentData[] = [
 ];
 
 export default function Payment() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold text-gray-900">Payment</h1>
@@ -48,8 +52,18 @@ export default function Payment() {
         />
       </div>
 
+      <div className="mb-6">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="inline-flex items-center px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Make New Payment
+        </button>
+      </div>
+
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div className="p-6 border-b">
+      <div className="p-6 border-b">
           <h2 className="text-lg font-semibold">Payment History</h2>
         </div>
         <div className="overflow-x-auto">
@@ -89,6 +103,11 @@ export default function Payment() {
           </table>
         </div>
       </div>
+
+      <PaymentModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }

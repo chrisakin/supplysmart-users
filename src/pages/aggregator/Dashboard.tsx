@@ -1,7 +1,6 @@
 import { Stats } from '../../components/dashboard/Stats';
 import { RevenueChart } from '../../components/dashboard/RevenueChart';
 import { RecentTransactions } from '../../components/dashboard/RecentTransactions';
-import { AgentStats } from '../../components/agents/AgentStats';
 
 export default function AggregatorDashboard() {
   return (
@@ -21,11 +20,6 @@ export default function AggregatorDashboard() {
       </div>
 
       <Stats />
-      
-      <div className="mt-8 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Agent Overview</h2>
-        <AgentStats />
-      </div>
 
       <div className="my-8">
         <RevenueChart />

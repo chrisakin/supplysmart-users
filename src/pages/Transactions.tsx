@@ -1,30 +1,40 @@
+import { useEffect } from 'react';
 import { CircleDollarSign, CheckCircle2, XCircle } from 'lucide-react';
 import { StatCard } from '../components/ui/StatCards';
-
-interface TransactionData {
-  id: string;
-  reference: string;
-  amount: string;
-  type: string;
-  status: 'Successful' | 'Failed' | 'Pending';
-  date: string;
-  customer: string;
-}
-
-const transactions: TransactionData[] = [
-  {
-    id: '1',
-    reference: 'TXN-2024-001',
-    amount: '₦50,000',
-    type: 'Transfer',
-    status: 'Successful',
-    date: '2024-03-15 14:30',
-    customer: 'John Doe',
-  },
-  // Add more sample data
-];
+import { useTransactionsStore } from '../store/transactions';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { useUserType } from '../hooks/useUserType';
+import { usePagination } from '../hooks/usePagination';
+import { Pagination } from '../components/ui/Pagination';
+import { formatCurrency, formatDate } from '../lib/utils';
 
 export default function Transactions() {
+  const userType = useUserType();
+  const { page, setPage, getPaginationParams } = usePagination(10);
+  const { transactions, stats, meta, loading, error, fetchTransactions } = useTransactionsStore();
+
+  useEffect(() => {
+    fetchTransactions(userType, getPaginationParams());
+  }, [userType, page, fetchTransactions]);
+
+  if (loading && !transactions.length) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-red-500">{error}</p>
+        <button 
+          onClick={() => fetchTransactions(userType, getPaginationParams())}
+          className="mt-4 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold text-gray-900">Transactions</h1>
@@ -33,24 +43,24 @@ export default function Transactions() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard 
           icon={CircleDollarSign}
-          label="Total Transactions"
-          value="₦1,234,567"
+          label="Total Amount"
+          value={formatCurrency(stats.totalAmount)}
         />
         <StatCard 
           icon={CheckCircle2}
           label="Successful"
-          value="1,234"
+          value={stats.successfulTransactions}
         />
         <StatCard 
           icon={XCircle}
           label="Failed"
-          value="23"
+          value={stats.failedTransactions}
         />
       </div>
 
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="p-6 border-b">
-          <h2 className="text-lg font-semibold">Recent Transactions</h2>
+          <h2 className="text-lg font-semibold">Transaction History</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -68,7 +78,7 @@ export default function Transactions() {
               {transactions.map((transaction) => (
                 <tr key={transaction.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{transaction.reference}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{transaction.amount}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{formatCurrency(transaction.amount)}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{transaction.type}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
@@ -81,13 +91,21 @@ export default function Transactions() {
                       {transaction.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{transaction.date}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{formatDate(transaction.date)}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{transaction.customer}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        
+        {meta && (
+          <Pagination
+            currentPage={meta.currentPage}
+            totalPages={meta.lastPage}
+            onPageChange={setPage}
+          />
+        )}
       </div>
     </div>
   );
