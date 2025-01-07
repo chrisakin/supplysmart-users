@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
+import { TransferDrawer } from './TransferDrawer';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -8,14 +9,38 @@ interface PaymentModalProps {
 
 export function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
   const [selectedMethod, setSelectedMethod] = useState<string>('');
+  const [showTransferDrawer, setShowTransferDrawer] = useState(false);
 
-  if (!isOpen) return null;
+  if (!isOpen && !showTransferDrawer) return null;
 
   const paymentMethods = [
     { id: 'bank', label: 'Transfer to Bank' },
     { id: 'bills', label: 'Pay Bills ( Gotv , Dstv , StarTime )' },
     { id: 'data', label: 'Data & Airtime' },
   ];
+
+  const handleContinue = () => {
+    if (selectedMethod === 'bank') {
+      setShowTransferDrawer(true);
+    } else {
+      // Handle other payment methods
+      console.log('Selected payment method:', selectedMethod);
+      onClose();
+    }
+  };
+
+  if (showTransferDrawer) {
+    return (
+      <TransferDrawer
+        isOpen={showTransferDrawer}
+        onClose={() => {
+          setShowTransferDrawer(false);
+          onClose();
+        }}
+        onBack={() => setShowTransferDrawer(false)}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-8 bg-black/50">
@@ -61,13 +86,7 @@ export function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
 
         <div className="p-8 border-t">
           <button
-            onClick={() => {
-              // Handle payment method selection
-              if (selectedMethod) {
-                console.log('Selected payment method:', selectedMethod);
-                onClose();
-              }
-            }}
+            onClick={handleContinue}
             disabled={!selectedMethod}
             className="w-full py-2 px-4 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
