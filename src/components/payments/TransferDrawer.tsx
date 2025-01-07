@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 
 interface Bank {
-  id: string;
+  id: number;
   name: string;
   code: string;
   logo: string;
@@ -42,16 +42,17 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
   useEffect(() => {
     const fetchBanks = async () => {
       try {
-        const token = localStorage.getItem('token');
+         const token = localStorage.getItem('token');
         const { data } = await axios.get('https://api.wildfusions.com/bank', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          }
+          },
         });
-        setBanks(data);
+        setBanks(data.banks);
       } catch (error) {
         console.error('Failed to fetch banks:', error);
+        toast.error('Failed to fetch banks. Please try again.');
       }
     };
     fetchBanks();
@@ -69,9 +70,9 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
         const endpoint = `/${userType}s/resolve/account/number`;
         const { data } = await api.post(endpoint, {
           account_number: value,
-          bank_code: formData.bankCode
+          bankName: formData.bankName
         });
-        setFormData(prev => ({ ...prev, account_name: data.account_name }));
+        setFormData(prev => ({ ...prev, account_name: data.data?.account_name }));
       } catch (error) {
         console.error('Failed to resolve account:', error);
       }
@@ -179,7 +180,7 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
                 />
                 {formData.account_name && (
                   <div className="mt-2">
-                    <p className="text-sm text-gray-600">{formData.account_name}</p>
+                    <p className="text-sm text-green-600">{formData.account_name}</p>
                     <label className="flex items-center mt-2 space-x-2">
                       <input
                         type="checkbox"
