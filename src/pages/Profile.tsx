@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Camera } from 'lucide-react';
+import { Camera, Lock } from 'lucide-react';
 import { useUserType } from '../hooks/useUserType';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
 import { LocationSelect } from '../components/forms/LocationSelect';
+import { validatePin } from '../lib/validation';
 
 interface ProfileData {
   bvn: string;
@@ -13,6 +14,7 @@ interface ProfileData {
   dob: string;
   governmentIssuedId: string;
   localGovernment: string;
+  hasPin: boolean;
 }
 
 export default function Profile() {
@@ -26,6 +28,12 @@ export default function Profile() {
     dob: '',
     governmentIssuedId: '',
     localGovernment: '',
+    hasPin: false,
+  });
+  const [securityData, setSecurityData] = useState({
+    currentPin: '',
+    newPin: '',
+    confirmPin: '',
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -58,6 +66,40 @@ export default function Profile() {
     }
   };
 
+  const handleSecuritySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (securityData.newPin !== securityData.confirmPin) {
+      toast.error('New PIN and confirmation do not match');
+      return;
+    }
+
+    if (!validatePin(securityData.newPin)) {
+      toast.error('PIN must be exactly 6 digits');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const endpoint = profileData.hasPin 
+        ? `/${userType}s/change-pin`
+        : `/${userType}s/set-pin`;
+
+      await api.post(endpoint, {
+        currentPin: securityData.currentPin,
+        newPin: securityData.newPin,
+      });
+
+      toast.success(profileData.hasPin ? 'PIN changed successfully' : 'PIN set successfully');
+      setSecurityData({ currentPin: '', newPin: '', confirmPin: '' });
+      setProfileData(prev => ({ ...prev, hasPin: true }));
+    } catch (error) {
+      toast.error('Failed to update PIN');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -85,107 +127,182 @@ export default function Profile() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Profile Settings</h1>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="flex items-center gap-6 mb-8">
-            <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                alt="Profile"
-                className="w-24 h-24 rounded-full object-cover"
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-0 right-0 p-2 bg-emerald-500 text-white rounded-full hover:bg-emerald-600"
-              >
-                <Camera className="w-4 h-4" />
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
+        <div className="space-y-6">
+          {/* Profile Information */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center gap-6 mb-8">
+              <div className="relative">
+                <img
+                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full object-cover"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute bottom-0 right-0 p-2 bg-emerald-500 text-white rounded-full hover:bg-emerald-600"
+                >
+                  <Camera className="w-4 h-4" />
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">John Doe</h2>
+                <p className="text-gray-500 capitalize">{userType}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-semibold">John Doe</h2>
-              <p className="text-gray-500 capitalize">{userType}</p>
-            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    BVN
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.bvn}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, bvn: e.target.value }))}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    value={profileData.dob}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, dob: e.target.value }))}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  />
+                </div>
+
+                <LocationSelect
+                  state={profileData.state}
+                  city={profileData.localGovernment}
+                  onStateChange={(state) => setProfileData(prev => ({ ...prev, state }))}
+                  onCityChange={(city) => setProfileData(prev => ({ ...prev, localGovernment: city }))}
+                />
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.address}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, address: e.target.value }))}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Government Issued ID
+                  </label>
+                  <select
+                    value={profileData.governmentIssuedId}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, governmentIssuedId: e.target.value }))}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  >
+                    <option value="">Select ID Type</option>
+                    <option value="voters-card">Voter's Card</option>
+                    <option value="drivers-license">Driver's License</option>
+                    <option value="national-id">National ID</option>
+                    <option value="international-passport">International Passport</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Security Settings */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-3 rounded-lg bg-emerald-100">
+                <Lock className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Security Settings</h2>
+                <p className="text-gray-500 text-sm">Manage your PIN and security preferences</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSecuritySubmit} className="space-y-6">
+              {profileData.hasPin && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Current PIN
+                  </label>
+                  <input
+                    type="password"
+                    maxLength={6}
+                    value={securityData.currentPin}
+                    onChange={(e) => setSecurityData(prev => ({ ...prev, currentPin: e.target.value }))}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    placeholder="Enter current 6-digit PIN"
+                    required
+                  />
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  BVN
+                  {profileData.hasPin ? 'New PIN' : 'PIN'}
                 </label>
                 <input
-                  type="text"
-                  value={profileData.bvn}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, bvn: e.target.value }))}
+                  type="password"
+                  maxLength={6}
+                  value={securityData.newPin}
+                  onChange={(e) => setSecurityData(prev => ({ ...prev, newPin: e.target.value }))}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="Enter 6-digit PIN"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date of Birth
+                  Confirm PIN
                 </label>
                 <input
-                  type="date"
-                  value={profileData.dob}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, dob: e.target.value }))}
+                  type="password"
+                  maxLength={6}
+                  value={securityData.confirmPin}
+                  onChange={(e) => setSecurityData(prev => ({ ...prev, confirmPin: e.target.value }))}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="Confirm 6-digit PIN"
+                  required
                 />
               </div>
 
-              <LocationSelect
-                state={profileData.state}
-                city={profileData.localGovernment}
-                onStateChange={(state) => setProfileData(prev => ({ ...prev, state }))}
-                onCityChange={(city) => setProfileData(prev => ({ ...prev, localGovernment: city }))}
-              />
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
-                </label>
-                <input
-                  type="text"
-                  value={profileData.address}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, address: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Government Issued ID
-                </label>
-                <select
-                  value={profileData.governmentIssuedId}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, governmentIssuedId: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <option value="">Select ID Type</option>
-                  <option value="voters-card">Voter's Card</option>
-                  <option value="drivers-license">Driver's License</option>
-                  <option value="national-id">National ID</option>
-                  <option value="international-passport">International Passport</option>
-                </select>
+                  {loading ? 'Saving...' : profileData.hasPin ? 'Change PIN' : 'Set PIN'}
+                </button>
               </div>
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>

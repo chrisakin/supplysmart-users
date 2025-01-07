@@ -20,7 +20,7 @@ export default function Layout() {
 
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      <main className="lg:pl-64 min-h-screen">
+      <main className="lg:pl-64 min-h-screen pt-16">
         <Navbar />
         <div className="max-w-7xl mx-auto">
           <Suspense fallback={<LoadingSpinner />}>
