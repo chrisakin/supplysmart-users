@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, X, Check, Search } from 'lucide-react';
+import { ArrowLeft, X, Check, Search, CheckIcon } from 'lucide-react';
 import { useUserType } from '../../hooks/useUserType';
 import api from '../../lib/axios';
-import { formatCurrency } from '../../lib/utils';
+import { formatAmountWhileTyping, formatCurrency } from '../../lib/utils';
 import { ConfirmationModal } from './ConfirmationModal';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { PasscodeModal } from './PasscodeModal';
 
 interface Bank {
   id: number;
@@ -23,12 +24,16 @@ interface TransferDrawerProps {
 export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps) {
   const userType = useUserType();
   const [loading, setLoading] = useState(false);
+  const [resolvingAccount, setResolvingAccount] = useState(false);
   const [banks, setBanks] = useState<Bank[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showBankList, setShowBankList] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [saveBeneficiary, setSaveBeneficiary] = useState(false);
-  
+  const [displayAmount, setDisplayAmount] = useState('');
+  const [showPasscodeModal, setShowPasscodeModal] = useState(false);
+  const [passcode, setPasscode] = useState('');
+
   const [formData, setFormData] = useState({
     bankName: '',
     bankCode: '',
@@ -42,7 +47,7 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
   useEffect(() => {
     const fetchBanks = async () => {
       try {
-         const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token');
         const { data } = await axios.get('https://api.wildfusions.com/bank', {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -58,31 +63,97 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
     fetchBanks();
   }, []);
 
-  const filteredBanks = banks.filter(bank => 
-    bank.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleConfirm = async () => {
+    setShowConfirmation(false);
+    setShowPasscodeModal(true);
+  };
+
+  const handlePasscodeSubmit = async (enteredPasscode: string) => {
+    try {
+      setLoading(true);
+      const { bankCode, bankLogo, amount, ...filteredFormData } = formData;
+      const endpoint = `/${userType}s/transfer`;
+      await api.post(endpoint, {
+        ...filteredFormData,
+        amount: parseFloat(amount),
+        passcode: enteredPasscode,
+        source: 'Web',
+        type: 'Web',
+        ref: Date.now().toString()
+      });
+      toast.success('Transfer successful');
+      onClose();
+    } catch (error) {
+      toast.error('Transfer failed. Please try again.');
+    } finally {
+      setLoading(false);
+      setShowPasscodeModal(false);
+    }
+  };
 
   const handleAccountNumberChange = async (value: string) => {
     setFormData(prev => ({ ...prev, account_number: value, account_name: '' }));
     
-    if (value.length === 10 && formData.bankCode) {
+    if (value.length === 10 && formData.bankName) {
       try {
+        setResolvingAccount(true);
         const endpoint = `/${userType}s/resolve/account/number`;
         const { data } = await api.post(endpoint, {
           account_number: value,
-          bankName: formData.bankName
+          bankName: formData.bankName 
         });
-        setFormData(prev => ({ ...prev, account_name: data.data?.account_name }));
+        
+        if (data.data.data?.account_name) {
+          setFormData(prev => ({ ...prev, account_name: data.data.data.account_name }));
+        } else {
+          toast.error('Could not resolve account name');
+        }
       } catch (error) {
         console.error('Failed to resolve account:', error);
+        toast.error('Failed to resolve account. Please check the account number and try again.');
+      } finally {
+        setResolvingAccount(false);
       }
     }
   };
 
-  const handleAmountChange = (value: string) => {
-    // Remove any non-numeric characters
-    const numericValue = value.replace(/[^0-9]/g, '');
-    setFormData(prev => ({ ...prev, amount: numericValue }));
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    const numbers = value.replace(/[^\d]/g, '');
+    
+    if (!numbers) {
+      setDisplayAmount('');
+      setFormData(prev => ({ ...prev, amount: '' }));
+      return;
+    }
+  
+    // Convert to decimal format
+    const decimal = (parseInt(numbers) / 100).toFixed(2);
+    
+    // Format as Nigerian Naira
+    const formatted = new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: 'NGN',
+      minimumFractionDigits: 2
+    }).format(parseFloat(decimal));
+  
+    setDisplayAmount(formatted);
+    setFormData(prev => ({
+      ...prev,
+      amount: decimal
+    }));
+  };
+
+
+  const handleAmountBlur = () => {
+    if (displayAmount) {
+      setDisplayAmount(formatCurrency(displayAmount));
+    }
+  };
+  
+  const handleAmountFocus = () => {
+    // Show raw number on focus
+    setDisplayAmount(formData.amount);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,6 +162,10 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
   };
 
   if (!isOpen) return null;
+
+  const filteredBanks = banks.filter(bank => 
+    bank.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <>
@@ -149,7 +224,8 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
                               ...prev,
                               bankName: bank.name,
                               bankCode: bank.code,
-                              bankLogo: bank.logo
+                              bankLogo: bank.logo,
+                              account_name: '' // Clear account name when bank changes
                             }));
                             setShowBankList(false);
                           }}
@@ -178,24 +254,32 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
                   placeholder="Enter 10-digit account number"
                   required
                 />
+                {resolvingAccount && (
+                  <p className="mt-2 text-sm text-gray-600">Resolving account...</p>
+                )}
                 {formData.account_name && (
                   <div className="mt-2">
                     <p className="text-sm text-green-600">{formData.account_name}</p>
                     <label className="flex items-center mt-2 space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={saveBeneficiary}
-                        onChange={(e) => setSaveBeneficiary(e.target.checked)}
-                        className="rounded border-gray-300 text-emerald-500 focus:ring-emerald-500"
-                      />
-                      <span className="text-sm text-gray-600 flex items-center">
-                        <Check className="w-4 h-4 text-emerald-500 mr-1" />
-                        Save as beneficiary
-                      </span>
-                    </label>
+                      <div 
+                        onClick={(e) => setSaveBeneficiary(!saveBeneficiary)}
+                        className={`w-5 h-5 cursor-pointer border rounded transition-colors duration-200 flex items-center justify-center
+                          ${saveBeneficiary 
+                            ? 'bg-emerald-500 border-emerald-500' 
+                            : 'bg-white border-gray-300'
+                            }`}
+                            >
+                            {saveBeneficiary && (
+                            <CheckIcon className="h-4 w-4 text-white" />
+                            )}
+                            </div>
+                            <span className="text-sm text-gray-600 flex items-center">
+                              Save as beneficiary
+                            </span>
+                          </label>
+                        </div>
+                      )}
                   </div>
-                )}
-              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -203,12 +287,14 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
                 </label>
                 <input
                   type="text"
-                  value={formData.amount ? formatCurrency(Number(formData.amount)) : ''}
-                  onChange={(e) => handleAmountChange(e.target.value)}
+                  value={displayAmount}
+                  onChange={handleAmountChange}
+                  onBlur={handleAmountBlur}
+                  onFocus={handleAmountFocus}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   placeholder="Enter amount"
                   required
-                />
+                  />
               </div>
 
               <div>
@@ -237,7 +323,7 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
         </div>
       </div>
 
-      {showConfirmation && (
+      {/* {showConfirmation && (
         <ConfirmationModal
           details={{
             bankName: formData.bankName,
@@ -249,9 +335,11 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
           onConfirm={async () => {
             try {
               setLoading(true);
+              const { bankCode, bankLogo, amount, ...filteredFormData } = formData;
               const endpoint = `/${userType}s/transfer`;
               await api.post(endpoint, {
-                ...formData,
+                ...filteredFormData,
+                amount: parseFloat(amount),
                 source: 'Web',
                 type: 'Web',
                 ref: Date.now().toString()
@@ -267,7 +355,28 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
           }}
           onCancel={() => setShowConfirmation(false)}
         />
-      )}
+      )} */}
+
+{showConfirmation && (
+      <ConfirmationModal
+        details={{
+          bankName: formData.bankName,
+          accountNumber: formData.account_number,
+          accountName: formData.account_name,
+          amount: formData.amount,
+          narration: formData.narration
+        }}
+        onConfirm={handleConfirm}
+        onCancel={() => setShowConfirmation(false)}
+      />
+    )}
+
+    {showPasscodeModal && (
+      <PasscodeModal
+        onConfirm={handlePasscodeSubmit}
+        onCancel={() => setShowPasscodeModal(false)}
+      />
+    )}
     </>
   );
 }

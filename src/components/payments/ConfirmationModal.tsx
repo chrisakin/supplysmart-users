@@ -14,6 +14,7 @@ interface ConfirmationModalProps {
 }
 
 export function ConfirmationModal({ details, onConfirm, onCancel }: ConfirmationModalProps) {
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50">
       <div className="bg-white rounded-lg max-w-md w-full">
@@ -45,12 +46,12 @@ export function ConfirmationModal({ details, onConfirm, onCancel }: Confirmation
 
             <div className="flex justify-between">
               <span className="text-gray-600">Account Holder Name</span>
-              <span className="font-medium">{details.accountName}</span>
+              <span className="font-medium text-right">{details.accountName}</span>
             </div>
 
             <div className="flex justify-between">
               <span className="text-gray-600">Amount</span>
-              <span className="font-medium">{formatCurrency(Number(details.amount))}</span>
+              <span className="font-medium">{formatCurrency(details.amount)}</span>
             </div>
 
             <div className="flex justify-between">
