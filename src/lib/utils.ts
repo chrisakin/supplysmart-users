@@ -4,7 +4,7 @@ export function cn(...classes: (string | undefined | boolean)[]) {
 
 export const formatCurrency = (value: string) => {
   // Remove all non-digit characters
-  const numericValue = value.replace(/[^\d]/g, '');
+  const numericValue = value && value.replace(/[^\d]/g, '');
   
   // Convert to number and format
   const amount = Number(numericValue) / 100;

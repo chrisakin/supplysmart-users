@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, X, Check, Search, CheckIcon } from 'lucide-react';
+import { ArrowLeft, X, Check, Search, CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { useUserType } from '../../hooks/useUserType';
 import api from '../../lib/axios';
 import { formatAmountWhileTyping, formatCurrency } from '../../lib/utils';
@@ -72,19 +72,28 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
     try {
       setLoading(true);
       const { bankCode, bankLogo, amount, ...filteredFormData } = formData;
+      
       const endpoint = `/${userType}s/transfer`;
       await api.post(endpoint, {
         ...filteredFormData,
-        amount: parseFloat(amount),
+        amount: String(parseFloat(amount)),
         passcode: enteredPasscode,
         source: 'Web',
         type: 'Web',
         ref: Date.now().toString()
       });
       toast.success('Transfer successful');
+      if (saveBeneficiary) {
+        const saveBeneficiaryEndpoint = `/${userType}s/save/beneficiary`;
+        await api.post(saveBeneficiaryEndpoint, {
+          accountNumber: formData.account_number,
+          bankName: formData.bankName,
+          accountName: formData.account_name
+        });
+      }
       onClose();
     } catch (error) {
-      toast.error('Transfer failed. Please try again.');
+      console.error('Transfer failed. Please try again.');
     } finally {
       setLoading(false);
       setShowPasscodeModal(false);
@@ -120,28 +129,26 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     const numbers = value.replace(/[^\d]/g, '');
-    
     if (!numbers) {
       setDisplayAmount('');
       setFormData(prev => ({ ...prev, amount: '' }));
       return;
     }
-  
-    // Convert to decimal format
     const decimal = (parseInt(numbers) / 100).toFixed(2);
-    
-    // Format as Nigerian Naira
     const formatted = new Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN',
       minimumFractionDigits: 2
     }).format(parseFloat(decimal));
-  
     setDisplayAmount(formatted);
     setFormData(prev => ({
       ...prev,
       amount: decimal
     }));
+  };
+
+  const toggleBankList = () => {
+    setShowBankList(prev => !prev);
   };
 
 
@@ -152,7 +159,6 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
   };
   
   const handleAmountFocus = () => {
-    // Show raw number on focus
     setDisplayAmount(formData.amount);
   };
 
@@ -190,15 +196,22 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
                   Select Bank
                 </label>
                 <div
-                  onClick={() => setShowBankList(true)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg flex items-center cursor-pointer"
+                  onClick={toggleBankList}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg flex items-center cursor-pointer justify-between"
                 >
+                  <div className="flex items-center">
                   {formData.bankLogo && (
                     <img src={formData.bankLogo} alt="" className="w-6 h-6 mr-2" />
                   )}
                   <span className={formData.bankName ? 'text-gray-900' : 'text-gray-500'}>
                     {formData.bankName || 'Select a bank'}
                   </span>
+                </div>
+                {showBankList ? (
+                  <ChevronUpIcon className="w-5 h-5 text-gray-500" />
+                ) : (
+                 <ChevronDownIcon className="w-5 h-5 text-gray-500" />
+                )}
                 </div>
 
                 {showBankList && (
@@ -322,40 +335,6 @@ export function TransferDrawer({ isOpen, onClose, onBack }: TransferDrawerProps)
           </div>
         </div>
       </div>
-
-      {/* {showConfirmation && (
-        <ConfirmationModal
-          details={{
-            bankName: formData.bankName,
-            accountNumber: formData.account_number,
-            accountName: formData.account_name,
-            amount: formData.amount,
-            narration: formData.narration
-          }}
-          onConfirm={async () => {
-            try {
-              setLoading(true);
-              const { bankCode, bankLogo, amount, ...filteredFormData } = formData;
-              const endpoint = `/${userType}s/transfer`;
-              await api.post(endpoint, {
-                ...filteredFormData,
-                amount: parseFloat(amount),
-                source: 'Web',
-                type: 'Web',
-                ref: Date.now().toString()
-              });
-              toast.success('Transfer successful');
-              onClose();
-            } catch (error) {
-              toast.error('Transfer failed. Please try again.');
-            } finally {
-              setLoading(false);
-              setShowConfirmation(false);
-            }
-          }}
-          onCancel={() => setShowConfirmation(false)}
-        />
-      )} */}
 
 {showConfirmation && (
       <ConfirmationModal
