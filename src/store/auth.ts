@@ -16,8 +16,23 @@ interface AuthState {
   logout: () => void;
 }
 
+// Initialize user from localStorage
+const getInitialUser = (): User | null => {
+  const userType = localStorage.getItem('userType') as 'agent' | 'aggregator';
+  const userId = localStorage.getItem('userId');
+  
+  if (userType && userId) {
+    return {
+      id: userId,
+      type: userType
+    };
+  }
+  
+  return null;
+};
+
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
+  user: getInitialUser(),
   token: localStorage.getItem('token'),
   refreshToken: localStorage.getItem('refreshToken'),
   loading: false,
@@ -30,9 +45,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       
       const { token, refreshToken, ['agentId or aggregatorId']: id } = response.data;
       
+      // Store all necessary data in localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('userType', type);
+      localStorage.setItem('userId', id);
       
       set({ 
         user: { id, type },
@@ -53,6 +70,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userType');
+    localStorage.removeItem('userId');
     set({ user: null, token: null, refreshToken: null });
   },
 }));
