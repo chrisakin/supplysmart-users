@@ -2,6 +2,7 @@ import { Suspense, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
+import { Navbar } from './ui/Navbar';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 
 export default function Layout() {
@@ -20,6 +21,7 @@ export default function Layout() {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       <main className="lg:pl-64 min-h-screen">
+        <Navbar />
         <div className="max-w-7xl mx-auto">
           <Suspense fallback={<LoadingSpinner />}>
             <Outlet />

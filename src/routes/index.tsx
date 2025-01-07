@@ -13,6 +13,7 @@ import { PrivateRoute } from '../components/PrivateRoute';
 // Lazy load pages
 const AgentDashboard = lazy(() => import('../pages/agent/Dashboard'));
 const AggregatorDashboard = lazy(() => import('../pages/aggregator/Dashboard'));
+const Profile = lazy(() => import('../pages/Profile'));
 const Agents = lazy(() => import('../pages/Agents'));
 const Terminals = lazy(() => import('../pages/Terminals'));
 const Transactions = lazy(() => import('../pages/Transactions'));
@@ -53,6 +54,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="dashboard" replace /> },
           { path: 'dashboard', element: <AgentDashboard /> },
+          { path: 'profile', element: <Profile /> },
           { path: 'terminals', element: <Terminals /> },
           { path: 'transactions', element: <Transactions /> },
           { path: 'wallet', element: <Wallets /> },
@@ -68,6 +70,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="dashboard" replace /> },
           { path: 'dashboard', element: <AggregatorDashboard /> },
+          { path: 'profile', element: <Profile /> },
           { path: 'agents', element: <Agents /> },
           { path: 'transactions', element: <Transactions /> },
           { path: 'wallet', element: <Wallets /> },
