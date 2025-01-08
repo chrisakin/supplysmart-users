@@ -5,10 +5,11 @@ import { EmptyState } from '../EmptyState';
 import { useUserType } from '../../hooks/useUserType';
 import { usePagination } from '../../hooks/usePagination';
 import { Pagination } from '../ui/Pagination';
+import { useTransactionsStore } from '../../store/transactions';
 
 export function RecentTransactions() {
   const userType = useUserType();
-  const { transactions, meta, loading, error, fetchTransactions } = useDashboardStore();
+  const { transactions, meta, loading, error, fetchTransactions } = useTransactionsStore();
   const { page, setPage, getPaginationParams } = usePagination(10);
 
   useEffect(() => {

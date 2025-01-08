@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import api from '../lib/axios';
-import { PaginatedResponse, PaginationParams } from '../types/pagination';
+import { PaginatedResponse } from '../types/pagination';
 import { Transaction, DashboardStats } from '../types/store';
 
 interface DashboardState {
@@ -9,7 +9,6 @@ interface DashboardState {
   meta: PaginatedResponse<Transaction>['meta'] | null;
   loading: boolean;
   error: string | null;
-  fetchTransactions: (userType: 'agent' | 'aggregator', params: PaginationParams) => Promise<void>;
   fetchStats: (userType: 'agent' | 'aggregator') => Promise<void>;
 }
 
@@ -25,27 +24,6 @@ export const useDashboardStore = create<DashboardState>((set) => ({
   loading: false,
   error: null,
 
-  fetchTransactions: async (userType, params) => {
-    try {
-      set({ loading: true, error: null });
-      const endpoint = `/${userType}s/transaction-history`;
-      
-      const { data } = await api.get<PaginatedResponse<Transaction>>(endpoint, {
-        params
-      });
-      
-      set({ 
-        transactions: data.data,
-        meta: data.meta,
-        loading: false 
-      });
-    } catch (error) {
-      set({ 
-        error: error instanceof Error ? error.message : 'Failed to fetch transactions',
-        loading: false 
-      });
-    }
-  },
 
   fetchStats: async (userType) => {
     try {
