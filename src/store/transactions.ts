@@ -2,18 +2,17 @@ import { create } from 'zustand';
 import api from '../lib/axios';
 import { PaginatedResponse, PaginationParams } from '../types/pagination';
 
-export interface Transaction {
-  id: string;
-  reference: string;
-  amount: number;
-  type: string;
-  status: 'Successful' | 'Failed' | 'Pending';
-  date: string;
-  customer: string;
+interface Transaction {
+  _id: string;
+  transactionReference: string;
+  recipientAccountName: string;
+  transactionAmount: string;
+  transactionType: string;
+  transactionStatus: string;
+  transactionDate: string;
 }
 
 interface TransactionStats {
-  totalTransactions: number;
   totalAmount: number;
   successfulTransactions: number;
   failedTransactions: number;
@@ -26,12 +25,12 @@ interface TransactionsState {
   loading: boolean;
   error: string | null;
   fetchTransactions: (userType: 'agent' | 'aggregator', params: PaginationParams) => Promise<void>;
+  fetchStats: (userType: 'agent' | 'aggregator') => Promise<void>;
 }
 
 export const useTransactionsStore = create<TransactionsState>((set) => ({
   transactions: [],
   stats: {
-    totalTransactions: 0,
     totalAmount: 0,
     successfulTransactions: 0,
     failedTransactions: 0
@@ -49,17 +48,8 @@ export const useTransactionsStore = create<TransactionsState>((set) => ({
         params
       });
       
-      // Calculate stats from the transactions
-      const stats = {
-        totalTransactions: data.meta.total,
-        totalAmount: data.data.reduce((sum, tx) => sum + tx.amount, 0),
-        successfulTransactions: data.data.filter(tx => tx.status === 'Successful').length,
-        failedTransactions: data.data.filter(tx => tx.status === 'Failed').length
-      };
-
       set({ 
         transactions: data.data,
-        stats,
         meta: data.meta,
         loading: false 
       });
@@ -70,4 +60,28 @@ export const useTransactionsStore = create<TransactionsState>((set) => ({
       });
     }
   },
+
+  fetchStats: async (userType) => {
+    try {
+      set({ loading: true, error: null });
+      const endpoint = `/${userType}s/transactions/stats`;
+      
+      const { data } = await api.get<{ stats: TransactionStats }>(endpoint);
+      
+      set({ 
+        stats: data.stats,
+        loading: false 
+      });
+    } catch (error) {
+      console.error('Failed to fetch transaction stats:', error);
+      set({ 
+        stats: {
+          totalAmount: 0,
+          successfulTransactions: 0,
+          failedTransactions: 0
+        },
+        loading: false 
+      });
+    }
+  }
 }));

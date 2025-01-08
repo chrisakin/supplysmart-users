@@ -3,14 +3,43 @@ import { useAgentsStore } from '../../store/agents';
 import { formatDate } from '../../lib/utils';
 import { Pagination } from '../ui/Pagination';
 import { usePagination } from '../../hooks/usePagination';
+import { EmptyState } from '../EmptyState';
 
 export function AgentsTable() {
-  const { agents, meta, loading, fetchAgents } = useAgentsStore();
+  const { agents, meta, loading, error, fetchAgents } = useAgentsStore();
   const { page, setPage, getPaginationParams } = usePagination(10);
 
   useEffect(() => {
     fetchAgents(getPaginationParams());
   }, [page, fetchAgents]);
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+        <p className="text-red-500 mb-4">{error}</p>
+        <button 
+          onClick={() => fetchAgents(getPaginationParams())}
+          className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!loading && agents.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="p-6 border-b">
+          <h2 className="text-lg font-semibold">All Agents</h2>
+        </div>
+        <EmptyState
+          title="No agents found"
+          description="There are no agents registered yet"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">

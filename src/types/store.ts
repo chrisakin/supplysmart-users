@@ -1,4 +1,17 @@
-// Add to existing types
+export interface Transaction {
+  id: string;
+  amount: string;
+  status: 'successful' | 'failed' | 'pending';
+  date: string;
+}
+
+export interface DashboardStats {
+  totalRevenue: number;
+  totalCommission: number;
+  successfulTransactions: string;
+  failedTransactions: string;
+}
+
 export interface Agent {
   id: string;
   name: string;
@@ -10,13 +23,15 @@ export interface Agent {
   totalTransactions: number;
 }
 
+export interface AgentStats {
+  totalAgents: number;
+  activeAgents: number;
+  inactiveAgents: number;
+}
+
 export interface AgentsState {
   agents: Agent[];
-  stats: {
-    totalAgents: number;
-    activeAgents: number;
-    inactiveAgents: number;
-  };
+  stats: AgentStats;
   loading: boolean;
   error: string | null;
   fetchAgents: () => Promise<void>;

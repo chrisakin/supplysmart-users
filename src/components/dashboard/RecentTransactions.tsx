@@ -1,8 +1,47 @@
+import { useEffect } from 'react';
 import { useDashboardStore } from '../../store/dashboard';
 import { formatCurrency, formatDate } from '../../lib/utils';
+import { EmptyState } from '../EmptyState';
+import { useUserType } from '../../hooks/useUserType';
+import { usePagination } from '../../hooks/usePagination';
+import { Pagination } from '../ui/Pagination';
 
 export function RecentTransactions() {
-  const { transactions } = useDashboardStore();
+  const userType = useUserType();
+  const { transactions, meta, loading, error, fetchTransactions } = useDashboardStore();
+  const { page, setPage, getPaginationParams } = usePagination(10);
+
+  useEffect(() => {
+    fetchTransactions(userType, getPaginationParams());
+  }, [userType, page, fetchTransactions]);
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+        <p className="text-red-500 mb-4">{error}</p>
+        <button 
+          onClick={() => fetchTransactions(userType, getPaginationParams())}
+          className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!loading && transactions.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="p-6 border-b">
+          <h3 className="text-lg font-semibold">Recent Transactions</h3>
+        </div>
+        <EmptyState
+          title="No transactions yet"
+          description="Your recent transactions will appear here"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -42,6 +81,13 @@ export function RecentTransactions() {
           </tbody>
         </table>
       </div>
+      {meta && (
+        <Pagination
+          currentPage={meta.currentPage}
+          totalPages={meta.lastPage}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }
