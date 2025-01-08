@@ -1,4 +1,3 @@
-import React from 'react';
 import { LogOut, X } from 'lucide-react';
 import { Link } from './ui/Link';
 import { images } from '../assets';

@@ -72,6 +72,7 @@ export const router = createBrowserRouter([
           { path: 'dashboard', element: <AggregatorDashboard /> },
           { path: 'profile', element: <Profile /> },
           { path: 'agents', element: <Agents /> },
+          { path: 'terminals', element: <Terminals /> },
           { path: 'transactions', element: <Transactions /> },
           { path: 'wallet', element: <Wallets /> },
           { path: 'payment', element: <Payment /> },

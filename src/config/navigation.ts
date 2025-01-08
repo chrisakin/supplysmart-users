@@ -30,8 +30,8 @@ export const agentMenu: MenuItem[] = [
 export const aggregatorMenu: MenuItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/aggregator/dashboard' },
   { icon: Users, label: 'Agents', href: '/aggregator/agents' },
+  { icon: Clock, label: 'Terminals', href: '/aggregator/terminals' },
   { icon: Receipt, label: 'Transactions', href: '/aggregator/transactions' },
-  { icon: ListChecks, label: 'Listings', href: '/aggregator/listings' },
   { icon: CreditCard, label: 'Payment', href: '/aggregator/payment' },
   { icon: MessageSquare, label: 'Feedback', href: '/aggregator/feedback' },
   { icon: FileBarChart, label: 'Report', href: '/aggregator/report' },
