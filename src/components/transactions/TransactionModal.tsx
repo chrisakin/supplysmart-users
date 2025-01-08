@@ -78,11 +78,7 @@ export function TransactionModal({ transaction, onClose }: TransactionModalProps
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Status</p>
-                  <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                    transaction.transactionStatus === 'success' 
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
+                  <span className={`inline-flex px-2 py-1 text-xs `}>
                     {transaction.transactionStatus}
                   </span>
                 </div>
