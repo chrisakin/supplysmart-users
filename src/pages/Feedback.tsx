@@ -1,15 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MessageSquare, Search, HelpCircle, Send, ChevronRight } from 'lucide-react';
 import { useUserType } from '../hooks/useUserType';
-import api from '../lib/axios';
+import { useFeedbackStore } from '../store/feedback';
+import { usePagination } from '../hooks/usePagination';
+import { EmptyState } from '../components/EmptyState';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import toast from 'react-hot-toast';
-
-interface FeedbackMessage {
-  id: string;
-  message: string;
-  createdAt: string;
-  isUser: boolean;
-}
 
 interface FAQItem {
   question: string;
@@ -35,38 +31,24 @@ export default function Feedback() {
   const [activeTab, setActiveTab] = useState<'chat' | 'faq'>('chat');
   const [message, setMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<FeedbackMessage[]>([
-    {
-      id: '1',
-      message: "Hello! How can I help you today?",
-      createdAt: new Date().toISOString(),
-      isUser: false
+  const { messages, loading, error, fetchMessages, sendMessage } = useFeedbackStore();
+  const { page, getPaginationParams } = usePagination(50);
+
+  useEffect(() => {
+    if (activeTab === 'chat') {
+      fetchMessages(userType, getPaginationParams());
     }
-  ]);
+  }, [userType, page, activeTab, fetchMessages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    const newMessage: FeedbackMessage = {
-      id: Date.now().toString(),
-      message: message.trim(),
-      createdAt: new Date().toISOString(),
-      isUser: true
-    };
-
-    setMessages(prev => [...prev, newMessage]);
-    setMessage('');
-
     try {
-      setLoading(true);
-      await api.post(`/${userType}s/feedback`, { message: newMessage.message });
-      toast.success('Feedback sent successfully');
+      await sendMessage(userType, message.trim());
+      setMessage('');
     } catch (error) {
-      toast.error('Failed to send feedback');
-    } finally {
-      setLoading(false);
+      toast.error('Failed to send message');
     }
   };
 
@@ -74,6 +56,10 @@ export default function Feedback() {
     faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
     faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading && !messages.length) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="p-8">
@@ -110,27 +96,44 @@ export default function Feedback() {
 
           {activeTab === 'chat' ? (
             <div className="flex flex-col h-[600px]">
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
+              {error ? (
+                <div className="p-8 text-center">
+                  <p className="text-red-500 mb-4">{error}</p>
+                  <button 
+                    onClick={() => fetchMessages(userType, getPaginationParams())}
+                    className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
                   >
+                    Retry
+                  </button>
+                </div>
+              ) : messages.length === 0 ? (
+                <EmptyState
+                  title="No messages yet"
+                  description="Start a conversation with our support team."
+                />
+              ) : (
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {messages.map((msg) => (
                     <div
-                      className={`max-w-[80%] rounded-lg p-4 ${
-                        msg.isUser
-                          ? 'bg-emerald-500 text-white'
-                          : 'bg-gray-100 text-gray-900'
-                      }`}
+                      key={msg.id}
+                      className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
                     >
-                      <p>{msg.message}</p>
-                      <p className={`text-xs mt-1 ${msg.isUser ? 'text-emerald-100' : 'text-gray-500'}`}>
-                        {new Date(msg.createdAt).toLocaleTimeString()}
-                      </p>
+                      <div
+                        className={`max-w-[80%] rounded-lg p-4 ${
+                          msg.isUser
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-gray-100 text-gray-900'
+                        }`}
+                      >
+                        <p>{msg.message}</p>
+                        <p className={`text-xs mt-1 ${msg.isUser ? 'text-emerald-100' : 'text-gray-500'}`}>
+                          {new Date(msg.createdAt).toLocaleTimeString()}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="p-4 border-t">
                 <div className="flex gap-2">
@@ -164,30 +167,37 @@ export default function Feedback() {
                 />
               </div>
 
-              <div className="space-y-4">
-                {filteredFAQs.map((faq, index) => (
-                  <div key={index} className="border rounded-lg">
-                    <button
-                      onClick={() => {
-                        const element = document.getElementById(`faq-${index}`);
-                        if (element) {
-                          element.classList.toggle('hidden');
-                        }
-                      }}
-                      className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50"
-                    >
-                      <div>
-                        <span className="font-medium">{faq.question}</span>
-                        <span className="block text-sm text-gray-500 mt-1">{faq.category}</span>
+              {filteredFAQs.length === 0 ? (
+                <EmptyState
+                  title="No FAQs found"
+                  description="Try searching with different keywords."
+                />
+              ) : (
+                <div className="space-y-4">
+                  {filteredFAQs.map((faq, index) => (
+                    <div key={index} className="border rounded-lg">
+                      <button
+                        onClick={() => {
+                          const element = document.getElementById(`faq-${index}`);
+                          if (element) {
+                            element.classList.toggle('hidden');
+                          }
+                        }}
+                        className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50"
+                      >
+                        <div>
+                          <span className="font-medium">{faq.question}</span>
+                          <span className="block text-sm text-gray-500 mt-1">{faq.category}</span>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                      </button>
+                      <div id={`faq-${index}`} className="hidden px-6 py-4 border-t bg-gray-50">
+                        <p className="text-gray-600">{faq.answer}</p>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
-                    </button>
-                    <div id={`faq-${index}`} className="hidden px-6 py-4 border-t bg-gray-50">
-                      <p className="text-gray-600">{faq.answer}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
