@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Phone, Lock } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { validatePhoneNumber, validatePin } from '../../lib/validation';
 
@@ -9,7 +9,6 @@ export function AgentLoginForm() {
   const [pin, setPin] = useState('');
   const [touched, setTouched] = useState({ phone: false, pin: false });
   const { login, loading, error } = useAuth();
-  const navigate = useNavigate();
 
   const isPhoneValid = validatePhoneNumber(phoneNumber);
   const isPinValid = validatePin(pin);

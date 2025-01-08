@@ -12,19 +12,23 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-white fixed inset-0 overflow-hidden">
       <div className="p-4">
         <BackButton to="/" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="lg:max-w-8xl max-w-full mx-auto px-4 py-4 h-full flex flex-col">
         <div className="flex justify-center mb-8">
           <img src={images.logo} alt="SupplySmart" className="h-12 w-auto" />
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          <SignupForm type={type as 'agent' | 'aggregator'} />
-          <SignupBenefits />
+        <div className="grid lg:grid-cols-2 gap-16 items-start flex-grow overflow-hidden mb-4">
+          <div className="overflow-auto h-full lg:px-8 custom-scrollbar">
+            <SignupForm type={type as 'agent' | 'aggregator'} />
+          </div>
+          <span className='hidden lg:block'>
+          <SignupBenefits  />
+          </span>
         </div>
       </div>
     </div>

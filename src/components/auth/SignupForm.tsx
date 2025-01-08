@@ -6,6 +6,7 @@ import { LocationSelect } from '../forms/LocationSelect';
 import { getFCMToken } from '../../lib/firebase';
 import { getDeviceIdentifier } from '../../lib/deviceIdentifier';
 
+
 interface SignupFormProps {
   type: 'agent' | 'aggregator';
 }
@@ -88,14 +89,15 @@ export function SignupForm({ type }: SignupFormProps) {
     }
     return baseValidation && validatePassword(formData.password);
   };
+  const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm max-w-2xl mx-auto w-full">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">
-        Complete the {type} Details
+    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm max-w-2xl mx-auto w-full overflow-auto py-10 mb-16">
+      <h2 className="text-xl text-center font-semibold text-gray-900 mb-6">
+        Complete the {capitalizedType} Details
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 mt-3">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             Full Name
@@ -285,6 +287,7 @@ export function SignupForm({ type }: SignupFormProps) {
           </label>
         </div>
 
+        <div className="pb-10">
         <button
           type="submit"
           disabled={loading || !isFormValid()}
@@ -292,6 +295,7 @@ export function SignupForm({ type }: SignupFormProps) {
         >
           {loading ? 'Creating Account...' : 'Create Account'}
         </button>
+        </div>
       </form>
     </div>
   );

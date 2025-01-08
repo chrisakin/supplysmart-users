@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Settings, LogOut } from 'lucide-react';
+import { User, Settings, LogOut, UserIcon } from 'lucide-react';
 import { useAuthStore } from '../../store/auth';
 import { useUserType } from '../../hooks/useUserType';
 
@@ -21,11 +21,13 @@ export function ProfileDropdown() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-3"
       >
-        <img
+        {/* <img
           src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
           alt="Profile"
           className="w-10 h-10 rounded-full object-cover"
-        />
+        /> */}
+        <span className="sr-only">Open user menu</span>
+        <UserIcon className="w-8 h-8 text-gray-500" />
         <div className="text-left">
           <p className="text-sm font-medium text-gray-700">John Doe</p>
           <p className="text-xs text-gray-500 capitalize">{userType}</p>

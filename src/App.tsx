@@ -1,11 +1,11 @@
-import React from 'react';
 import { Sidebar } from './components/Sidebar';
 import { DataTable } from './components/DataTable';
+
 
 function App() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Sidebar />
+      <Sidebar isOpen={true} onClose={() => {}} />
       <main className="pl-64">
         <div className="p-8">
           <div className="mb-8">

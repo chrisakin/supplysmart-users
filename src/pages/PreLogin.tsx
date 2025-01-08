@@ -1,9 +1,8 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Box } from 'lucide-react';
 import { images, icons } from '../assets';
 
 export default function PreLogin() {
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-white">
@@ -20,18 +19,11 @@ export default function PreLogin() {
               <Link to="/signup/aggregator" className="text-gray-600 hover:text-gray-900">
                 Become an Aggregator
               </Link>
-              <button 
-                onClick={() => navigate('/login/agent')}
-                className="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 transition-colors"
-              >
-                Get Started
-              </button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Rest of the component remains the same */}
       <div className="flex min-h-[calc(100vh-64px)]">
         <div className="hidden lg:flex w-1/2 bg-[#1fc18833] items-center justify-center relative">
           <div className="absolute inset-0 flex items-start justify-center z-10 pt-20">
@@ -44,7 +36,9 @@ export default function PreLogin() {
               </p>
             </div>
           </div>
+          <div className="mt-48">
           <icons.EmptyStateIcon className="w-[448px] h-[422px] opacity-50" />
+          </div>
           <div className="absolute inset-x-0 bottom-0 top-1/2 bg-gradient-to-t from-[#1fc18833] to-transparent" />
         </div>
 
