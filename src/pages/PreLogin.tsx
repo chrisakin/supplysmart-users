@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Box } from 'lucide-react';
 import { images, icons } from '../assets';
 
 export default function PreLogin() {
+  const [isSignup, setIsSignup] = useState(false);
 
   return (
     <div className="min-h-screen bg-white">
@@ -11,14 +13,6 @@ export default function PreLogin() {
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
               <img src={images.logo} alt="SupplySmart" className="h-8 w-auto" />
-            </div>
-            <div className="flex items-center gap-6">
-              <Link to="/signup/agent" className="text-gray-600 hover:text-gray-900">
-                Become an Agent
-              </Link>
-              <Link to="/signup/aggregator" className="text-gray-600 hover:text-gray-900">
-                Become an Aggregator
-              </Link>
             </div>
           </div>
         </div>
@@ -37,7 +31,7 @@ export default function PreLogin() {
             </div>
           </div>
           <div className="mt-48">
-          <icons.EmptyStateIcon className="w-[448px] h-[422px] opacity-50" />
+            <icons.EmptyStateIcon className="w-[448px] h-[422px] opacity-50" />
           </div>
           <div className="absolute inset-x-0 bottom-0 top-1/2 bg-gradient-to-t from-[#1fc18833] to-transparent" />
         </div>
@@ -55,23 +49,39 @@ export default function PreLogin() {
 
             <div className="bg-white rounded-xl p-8 shadow-md border border-gray-100">
               <h2 className="text-2xl font-semibold text-center mb-8">
-                Choose your preferred service
+                {isSignup ? 'Choose account type' : 'Choose your preferred service'}
               </h2>
               <div className="space-y-4">
                 <Link
-                  to="/login/agent"
+                  to={isSignup ? '/signup/agent' : '/login/agent'}
                   className="flex items-center justify-between w-full px-6 py-4 border-2 border-emerald-500 rounded-xl text-emerald-500 hover:bg-emerald-50 transition-all duration-200 group hover:shadow-md"
                 >
-                  <span className="font-medium">Sign in as agent</span>
+                  <span className="font-medium">
+                    {isSignup ? 'Become an agent' : 'Sign in as agent'}
+                  </span>
                   <Box className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1 duration-200" />
                 </Link>
                 <Link
-                  to="/login/aggregator"
+                  to={isSignup ? '/signup/aggregator' : '/login/aggregator'}
                   className="flex items-center justify-between w-full px-6 py-4 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all duration-200 group hover:shadow-md"
                 >
-                  <span className="font-medium">Sign in as aggregator</span>
+                  <span className="font-medium">
+                    {isSignup ? 'Become an aggregator' : 'Sign in as aggregator'}
+                  </span>
                   <Box className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1 duration-200" />
                 </Link>
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="text-gray-600">
+                  {isSignup ? 'Already have an account? ' : "Don't have an account? "}
+                  <button
+                    onClick={() => setIsSignup(!isSignup)}
+                    className="text-emerald-600 hover:text-emerald-500 font-medium"
+                  >
+                    {isSignup ? 'Sign in' : 'Sign up'}
+                  </button>
+                </p>
               </div>
             </div>
           </div>
