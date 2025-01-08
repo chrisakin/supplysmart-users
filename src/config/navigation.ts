@@ -7,7 +7,6 @@ import {
   MessageSquare,
   FileBarChart,
   Users,
-  ListChecks,
   LucideIcon
 } from 'lucide-react';
 

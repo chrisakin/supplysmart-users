@@ -37,7 +37,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           </button>
         </div>
         
-        <nav className="flex-1 px-3">
+        <nav className="flex-1 px-3 mt-4">
           <ul className="space-y-1">
             {menuItems.map((item) => (
               <li key={item.label}>
