@@ -79,6 +79,7 @@ export default function Transactions() {
                   <tr className="bg-gray-50">
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reference</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Recipient</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bank</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -98,6 +99,9 @@ export default function Transactions() {
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {transaction.recipientAccountName}
                       </td>
+                      <td className="px-6 py-4 text-sm text-gray-900 capitalize">
+                        {transaction.recipientBank}
+                      </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {formatCurrency(transaction.transactionAmount)}
                       </td>
@@ -106,7 +110,7 @@ export default function Transactions() {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                          transaction.transactionStatus === 'success' 
+                          transaction.transactionStatus === 'success'
                             ? 'bg-emerald-100 text-emerald-800'
                             : 'bg-red-100 text-red-800'
                         }`}>

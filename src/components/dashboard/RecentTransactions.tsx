@@ -55,7 +55,9 @@ export function RecentTransactions() {
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50">
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reference</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Recipient</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bank</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
@@ -63,19 +65,31 @@ export function RecentTransactions() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {transactions.map((transaction) => (
-              <tr key={transaction.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 text-sm font-medium text-gray-900">{transaction.id}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{formatCurrency(transaction.amount)}</td>
+              <tr key={transaction._id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                  {transaction.transactionReference}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  {transaction.recipientAccountName}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900 capitalize">
+                  {transaction.recipientBank}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  {formatCurrency(transaction.transactionAmount)}
+                </td>
                 <td className="px-6 py-4">
                   <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                    transaction.status === 'successful' 
-                      ? 'bg-emerald-100 text-emerald-800' 
+                    transaction.transactionStatus === 'success'
+                      ? 'bg-emerald-100 text-emerald-800'
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {transaction.status}
+                    {transaction.transactionStatus}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900">{formatDate(transaction.date)}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  {formatDate(transaction.transactionDate)}
+                </td>
               </tr>
             ))}
           </tbody>

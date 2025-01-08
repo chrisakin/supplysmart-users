@@ -6,10 +6,16 @@ interface Transaction {
   _id: string;
   transactionReference: string;
   recipientAccountName: string;
+  recipientBank: string;
+  recipientAccountNumber: string;
   transactionAmount: string;
   transactionType: string;
   transactionStatus: string;
   transactionDate: string;
+  transactionDescription: string;
+  transactionId: string;
+  transactionTransferCode: string;
+  transactionFailureReason: string | null;
 }
 
 interface TransactionStats {
@@ -44,13 +50,18 @@ export const useTransactionsStore = create<TransactionsState>((set) => ({
       set({ loading: true, error: null });
       const endpoint = `/${userType}s/transaction-history`;
       
-      const { data } = await api.get<PaginatedResponse<Transaction>>(endpoint, {
+      const { data } = await api.get(endpoint, {
         params
       });
       
       set({ 
-        transactions: data.data,
-        meta: data.meta,
+        transactions: data.data.transactionHistory,
+        meta: {
+          total: data.data.total,
+          currentPage: data.data.pagination.currentPage || 1,
+          lastPage: data.data.pagination.lastPage || 1,
+          perPage: data.data.pagination.perPage || 10
+        },
         loading: false 
       });
     } catch (error) {
