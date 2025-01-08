@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Phone, Lock } from 'lucide-react';
+import { Phone, Lock, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { validatePhoneNumber, validatePin } from '../../lib/validation';
@@ -7,6 +7,7 @@ import { validatePhoneNumber, validatePin } from '../../lib/validation';
 export function AgentLoginForm() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [pin, setPin] = useState('');
+  const [showPin, setShowPin] = useState(false);
   const [touched, setTouched] = useState({ phone: false, pin: false });
   const { login, loading, error } = useAuth();
 
@@ -63,15 +64,26 @@ export function AgentLoginForm() {
           </div>
           <input
             id="pin"
-            type="password"
+            type={showPin ? "text" : "password"}
             value={pin}
             onChange={(e) => setPin(e.target.value)}
             onBlur={() => setTouched(prev => ({ ...prev, pin: true }))}
             maxLength={6}
             placeholder="Enter your 6-digit PIN"
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             required
           />
+          <button
+            type="button"
+            onClick={() => setShowPin(!showPin)}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+          >
+            {showPin ? (
+              <EyeOff className="h-5 w-5" />
+            ) : (
+              <Eye className="h-5 w-5" />
+            )}
+          </button>
         </div>
         {touched.pin && !isPinValid && (
           <p className="mt-1 text-sm text-red-500">PIN must be exactly 6 digits</p>
