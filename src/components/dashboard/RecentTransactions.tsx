@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { useDashboardStore } from '../../store/dashboard';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import { EmptyState } from '../EmptyState';
 import { useUserType } from '../../hooks/useUserType';

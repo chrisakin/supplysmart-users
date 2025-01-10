@@ -14,6 +14,7 @@ interface FeedbackState {
   meta: PaginatedResponse<FeedbackMessage>['meta'] | null;
   loading: boolean;
   error: string | null;
+  requestId: number;
   fetchMessages: (userType: 'agent' | 'aggregator', params: PaginationParams) => Promise<void>;
   sendMessage: (userType: 'agent' | 'aggregator', message: string) => Promise<void>;
 }
@@ -23,45 +24,54 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => ({
   meta: null,
   loading: false,
   error: null,
+  requestId: 0,
 
   fetchMessages: async (userType, params) => {
+    const currentRequestId = get().requestId + 1;
+    set({ requestId: currentRequestId, loading: true, error: null });
+
     try {
-      set({ loading: true, error: null });
       const endpoint = `/${userType}s/feedback`;
+      const { data } = await api.get<PaginatedResponse<FeedbackMessage>>(endpoint, { params });
       
-      const { data } = await api.get<PaginatedResponse<FeedbackMessage>>(endpoint, {
-        params
-      });
-      
-      set({ 
-        messages: data.data,
-        meta: data.meta,
-        loading: false 
-      });
+      if (get().requestId === currentRequestId) {
+        set({ 
+          messages: data.data,
+          meta: data.meta,
+          loading: false 
+        });
+      }
     } catch (error) {
-      set({ 
-        error: error instanceof Error ? error.message : 'Failed to fetch messages',
-        loading: false 
-      });
+      if (get().requestId === currentRequestId) {
+        set({ 
+          error: error instanceof Error ? error.message : 'Failed to fetch messages',
+          loading: false 
+        });
+      }
     }
   },
 
   sendMessage: async (userType, message) => {
+    const currentRequestId = get().requestId + 1;
+    set({ requestId: currentRequestId, loading: true, error: null });
+
     try {
-      set({ loading: true, error: null });
       const endpoint = `/${userType}s/feedback`;
-      
       const { data } = await api.post<{ message: FeedbackMessage }>(endpoint, { message });
       
-      set({ 
-        messages: [...get().messages, data.message],
-        loading: false 
-      });
+      if (get().requestId === currentRequestId) {
+        set({ 
+          messages: [...get().messages, data.message],
+          loading: false 
+        });
+      }
     } catch (error) {
-      set({ 
-        error: error instanceof Error ? error.message : 'Failed to send message',
-        loading: false 
-      });
+      if (get().requestId === currentRequestId) {
+        set({ 
+          error: error instanceof Error ? error.message : 'Failed to send message',
+          loading: false 
+        });
+      }
     }
   }
 }));

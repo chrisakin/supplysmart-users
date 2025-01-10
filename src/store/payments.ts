@@ -24,11 +24,12 @@ interface PaymentsState {
   meta: PaginatedResponse<Payment>['meta'] | null;
   loading: boolean;
   error: string | null;
+  requestId: number;
   fetchPayments: (userType: 'agent' | 'aggregator', params: PaginationParams) => Promise<void>;
   fetchStats: (userType: 'agent' | 'aggregator') => Promise<void>;
 }
 
-export const usePaymentsStore = create<PaymentsState>((set) => ({
+export const usePaymentsStore = create<PaymentsState>((set, get) => ({
   payments: [],
   stats: {
     totalPayments: 0,
@@ -38,49 +39,58 @@ export const usePaymentsStore = create<PaymentsState>((set) => ({
   meta: null,
   loading: false,
   error: null,
+  requestId: 0,
 
   fetchPayments: async (userType, params) => {
+    const currentRequestId = get().requestId + 1;
+    set({ requestId: currentRequestId, loading: true, error: null });
+
     try {
-      set({ loading: true, error: null });
       const endpoint = `/${userType}s/payment-history`;
+      const { data } = await api.get<PaginatedResponse<Payment>>(endpoint, { params });
       
-      const { data } = await api.get<PaginatedResponse<Payment>>(endpoint, {
-        params
-      });
-      
-      set({ 
-        payments: data.data,
-        meta: data.meta,
-        loading: false 
-      });
+      if (get().requestId === currentRequestId) {
+        set({ 
+          payments: data.data,
+          meta: data.meta,
+          loading: false 
+        });
+      }
     } catch (error) {
-      set({ 
-        error: error instanceof Error ? error.message : 'Failed to fetch payments',
-        loading: false 
-      });
+      if (get().requestId === currentRequestId) {
+        set({ 
+          error: error instanceof Error ? error.message : 'Failed to fetch payments',
+          loading: false 
+        });
+      }
     }
   },
 
   fetchStats: async (userType) => {
+    const currentRequestId = get().requestId + 1;
+    set({ requestId: currentRequestId, loading: true, error: null });
+
     try {
-      set({ loading: true, error: null });
       const endpoint = `/${userType}s/payment/stats`;
-      
       const { data } = await api.get<{ stats: PaymentStats }>(endpoint);
       
-      set({ 
-        stats: data.stats,
-        loading: false 
-      });
+      if (get().requestId === currentRequestId) {
+        set({ 
+          stats: data.stats,
+          loading: false 
+        });
+      }
     } catch (error) {
-      set({ 
-        stats: {
-          totalPayments: 0,
-          completedPayments: 0,
-          failedPayments: 0
-        },
-        loading: false 
-      });
+      if (get().requestId === currentRequestId) {
+        set({ 
+          stats: {
+            totalPayments: 0,
+            completedPayments: 0,
+            failedPayments: 0
+          },
+          loading: false 
+        });
+      }
     }
   }
 }));
