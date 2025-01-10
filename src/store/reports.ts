@@ -2,11 +2,10 @@ import { create } from 'zustand';
 import api from '../lib/axios';
 import { PaginatedResponse, PaginationParams } from '../types/pagination';
 
-export interface Report {
+interface Report {
   id: string;
-  type: string;
   title: string;
-  description: string;
+  type: string;
   status: 'Completed' | 'Processing' | 'Failed';
   createdAt: string;
   downloadUrl?: string;
@@ -21,7 +20,7 @@ interface ReportsState {
   generateReport: (userType: 'agent' | 'aggregator', type: string) => Promise<void>;
 }
 
-export const useReportsStore = create<ReportsState>((set, get) => ({
+export const useReportsStore = create<ReportsState>((set) => ({
   reports: [],
   meta: null,
   loading: false,
@@ -54,10 +53,14 @@ export const useReportsStore = create<ReportsState>((set, get) => ({
       set({ loading: true, error: null });
       const endpoint = `/${userType}s/reports/generate`;
       
-      const { data } = await api.post<{ report: Report }>(endpoint, { type });
+      await api.post(endpoint, { type });
+      
+      // Refresh reports list after generating new report
+      const { data } = await api.get<PaginatedResponse<Report>>(`/${userType}s/reports`);
       
       set({ 
-        reports: [data.report, ...get().reports],
+        reports: data.data,
+        meta: data.meta,
         loading: false 
       });
     } catch (error) {
