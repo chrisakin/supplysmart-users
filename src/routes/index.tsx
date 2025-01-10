@@ -60,7 +60,7 @@ export const router = createBrowserRouter([
           { path: 'wallet', element: <Wallets /> },
           { path: 'payment', element: <Payment /> },
           { path: 'feedback', element: <Feedback /> },
-          { path: 'reports', element: <Reports /> },
+          { path: 'report', element: <Reports /> },
         ],
       },
       // Aggregator Routes
@@ -77,7 +77,7 @@ export const router = createBrowserRouter([
           { path: 'wallet', element: <Wallets /> },
           { path: 'payment', element: <Payment /> },
           { path: 'feedback', element: <Feedback /> },
-          { path: 'reports', element: <Reports /> },
+          { path: 'report', element: <Reports /> },
         ],
       },
     ],
