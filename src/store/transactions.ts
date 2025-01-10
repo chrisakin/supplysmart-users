@@ -31,8 +31,8 @@ interface TransactionsState {
   loading: boolean;
   error: string | null;
   requestId: number;
-  fetchTransactions: (userType: 'agent' | 'aggregator', params: PaginationParams) => Promise<void>;
-  fetchStats: (userType: 'agent' | 'aggregator') => Promise<void>;
+  fetchTransactions: (userType: 'agent' | 'aggregator', params: Record<string, any>) => Promise<void>;
+  fetchStats: (userType: 'agent' | 'aggregator', params?: Record<string, any>) => Promise<void>;
 }
 
 export const useTransactionsStore = create<TransactionsState>((set, get) => ({
@@ -77,13 +77,13 @@ export const useTransactionsStore = create<TransactionsState>((set, get) => ({
     }
   },
 
-  fetchStats: async (userType) => {
+  fetchStats: async (userType, params = {}) => {
     const currentRequestId = get().requestId + 1;
     set({ requestId: currentRequestId, loading: true, error: null });
 
     try {
       const endpoint = `/${userType}s/transactions/stats`;
-      const { data } = await api.get<{ stats: TransactionStats }>(endpoint);
+      const { data } = await api.get<{ stats: TransactionStats }>(endpoint, { params });
       
       if (get().requestId === currentRequestId) {
         set({ 

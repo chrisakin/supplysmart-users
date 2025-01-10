@@ -6,20 +6,35 @@ import { formatCurrency, formatDate } from '../lib/utils';
 import { useTransactionsStore } from '../store/transactions';
 import { useUserType } from '../hooks/useUserType';
 import { usePagination } from '../hooks/usePagination';
+import { useFilters } from '../hooks/useFilters';
 import { EmptyState } from '../components/EmptyState';
 import { Pagination } from '../components/ui/Pagination';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { TransactionFilters } from '../components/transactions/TransactionFilters';
 
 export default function Transactions() {
   const userType = useUserType();
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
   const { transactions, stats, meta, loading, error, fetchTransactions, fetchStats } = useTransactionsStore();
   const { page, setPage, getPaginationParams } = usePagination(10);
+  const { filters, updateFilters, getQueryParams } = useFilters();
 
   useEffect(() => {
-    fetchTransactions(userType, getPaginationParams());
-    fetchStats(userType);
-  }, [userType, page, fetchTransactions, fetchStats]);
+    const params = {
+      ...getPaginationParams(),
+      ...getQueryParams()
+    };
+    fetchTransactions(userType, params);
+    fetchStats(userType, params);
+  }, [userType, page, filters, fetchTransactions, fetchStats]);
+
+  const handleDateChange = (startDate: string, endDate: string) => {
+    updateFilters({ startDate, endDate });
+  };
+
+  const handleStatusChange = (status: string) => {
+    updateFilters({ status });
+  };
 
   if (loading && !transactions.length) {
     return <LoadingSpinner />;
@@ -50,7 +65,12 @@ export default function Transactions() {
 
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="p-6 border-b">
-          <h2 className="text-lg font-semibold">Transaction History</h2>
+          <h2 className="text-lg font-semibold mb-4">Transaction History</h2>
+          <TransactionFilters
+            onDateChange={handleDateChange}
+            onStatusChange={handleStatusChange}
+            selectedStatus={filters.status || ''}
+          />
         </div>
 
         {error ? (
@@ -58,8 +78,12 @@ export default function Transactions() {
             <p className="text-red-500 mb-4">{error}</p>
             <button 
               onClick={() => {
-                fetchTransactions(userType, getPaginationParams());
-                fetchStats(userType);
+                const params = {
+                  ...getPaginationParams(),
+                  ...getQueryParams()
+                };
+                fetchTransactions(userType, params);
+                fetchStats(userType, params);
               }}
               className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
             >
@@ -68,7 +92,7 @@ export default function Transactions() {
           </div>
         ) : transactions.length === 0 ? (
           <EmptyState
-          icon={ListChecks}
+            icon={ListChecks}
             title="No transactions found"
             description="Your transaction history will appear here"
           />
