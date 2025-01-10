@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CircleDollarSign, CheckCircle2, XCircle } from 'lucide-react';
+import { CircleDollarSign, CheckCircle2, XCircle, ListChecks } from 'lucide-react';
 import { StatCard } from '../components/ui/StatCards';
 import { TransactionModal } from '../components/transactions/TransactionModal';
 import { formatCurrency, formatDate } from '../lib/utils';
@@ -68,6 +68,7 @@ export default function Transactions() {
           </div>
         ) : transactions.length === 0 ? (
           <EmptyState
+          icon={ListChecks}
             title="No transactions found"
             description="Your transaction history will appear here"
           />

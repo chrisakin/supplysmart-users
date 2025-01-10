@@ -78,6 +78,7 @@ export default function Payment() {
           </div>
         ) : payments.length === 0 ? (
           <EmptyState
+            icon={CreditCard}
             title="No payments found"
             description="Your payment history will appear here"
           />

@@ -74,6 +74,7 @@ export default function Reports() {
           </div>
         ) : reports.length === 0 ? (
           <EmptyState
+          icon={FileBarChart}
             title="No reports found"
             description="Generate a report to get started"
             actionLabel="Generate Report"

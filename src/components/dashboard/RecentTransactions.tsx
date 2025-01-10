@@ -6,6 +6,7 @@ import { useUserType } from '../../hooks/useUserType';
 import { usePagination } from '../../hooks/usePagination';
 import { Pagination } from '../ui/Pagination';
 import { useTransactionsStore } from '../../store/transactions';
+import { ListChecks } from 'lucide-react';
 
 export function RecentTransactions() {
   const userType = useUserType();
@@ -37,6 +38,7 @@ export function RecentTransactions() {
           <h3 className="text-lg font-semibold">Recent Transactions</h3>
         </div>
         <EmptyState
+        icon={ListChecks}
           title="No transactions yet"
           description="Your recent transactions will appear here"
         />

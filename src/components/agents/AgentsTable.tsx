@@ -4,6 +4,7 @@ import { formatDate } from '../../lib/utils';
 import { Pagination } from '../ui/Pagination';
 import { usePagination } from '../../hooks/usePagination';
 import { EmptyState } from '../EmptyState';
+import { Users } from 'lucide-react';
 
 export function AgentsTable() {
   const { agents, meta, loading, error, fetchAgents } = useAgentsStore();
@@ -34,6 +35,7 @@ export function AgentsTable() {
           <h2 className="text-lg font-semibold">All Agents</h2>
         </div>
         <EmptyState
+          icon={Users}
           title="No agents found"
           description="There are no agents registered yet"
         />

@@ -66,6 +66,7 @@ export default function Wallets() {
           </div>
         ) : transactions.length === 0 ? (
           <EmptyState
+          icon={Wallet}
             title="No transactions found"
             description="You haven't made any wallet transactions yet."
           />

@@ -108,6 +108,7 @@ export default function Feedback() {
                 </div>
               ) : messages.length === 0 ? (
                 <EmptyState
+                icon={MessageSquare}
                   title="No messages yet"
                   description="Start a conversation with our support team."
                 />
@@ -169,6 +170,7 @@ export default function Feedback() {
 
               {filteredFAQs.length === 0 ? (
                 <EmptyState
+                icon={HelpCircle}
                   title="No FAQs found"
                   description="Try searching with different keywords."
                 />

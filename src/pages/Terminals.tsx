@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Terminal, CheckCircle, XCircle } from 'lucide-react';
+import { Terminal, CheckCircle, XCircle, TerminalSquare } from 'lucide-react';
 import { StatCard } from '../components/ui/StatCards';
 import { useTerminalsStore } from '../store/terminals';
 import { useUserType } from '../hooks/useUserType';
@@ -66,6 +66,7 @@ export default function Terminals() {
           </div>
         ) : terminals.length === 0 ? (
           <EmptyState
+            icon={TerminalSquare}
             title="No terminals found"
             description="There are no terminals available at the moment."
           />
