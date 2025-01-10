@@ -55,11 +55,16 @@ api.interceptors.response.use(
       }
     }
 
-    // Show error toast
-    const errorMessage = error.response?.data?.message || 'An error occurred';
-    toast.error(errorMessage);
+    // Only show toast for non-GET requests
+    if (originalRequest.method !== 'get') {
+      const errorMessage = error.response?.data?.message || 'An error occurred';
+      toast.error(errorMessage);
+    }
 
-    return Promise.reject(errorMessage);
+    // Always log the error to console
+    console.error('API Error:', error);
+
+    return Promise.reject(error.response?.data?.message || 'An error occurred');
   }
 );
 

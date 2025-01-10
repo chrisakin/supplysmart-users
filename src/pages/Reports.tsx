@@ -15,14 +15,24 @@ export default function Reports() {
   const { page, setPage, getPaginationParams } = usePagination(10);
 
   useEffect(() => {
-    fetchReports(userType, getPaginationParams());
+    const loadReports = async () => {
+      try {
+        await fetchReports(userType, getPaginationParams());
+      } catch (err) {
+        console.error('Failed to load reports:', err);
+      }
+    };
+    loadReports();
   }, [userType, page, fetchReports]);
 
   const handleGenerateReport = async (type: string) => {
     try {
       await generateReport(userType, type);
       toast.success('Report generation started');
+      // Refresh the reports list
+      fetchReports(userType, getPaginationParams());
     } catch (error) {
+      console.error('Failed to generate report:', error);
       toast.error('Failed to generate report');
     }
   };
@@ -65,7 +75,9 @@ export default function Reports() {
         ) : reports.length === 0 ? (
           <EmptyState
             title="No reports found"
-            description="Generate a report to get started."
+            description="Generate a report to get started"
+            actionLabel="Generate Report"
+            onAction={() => handleGenerateReport('transactions')}
           />
         ) : (
           <>
