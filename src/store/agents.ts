@@ -31,7 +31,7 @@ export const useAgentsStore = create<AgentsState>((set, get) => ({
     set({ requestId: currentRequestId, loading: true, error: null });
 
     try {
-      const { data } = await api.get<PaginatedResponse<Agent>>('aggregators/payment-history', {
+      const { data } = await api.get<PaginatedResponse<Agent>>('/aggregators/agents', {
         params,
       });
       
@@ -58,7 +58,7 @@ export const useAgentsStore = create<AgentsState>((set, get) => ({
     set({ requestId: currentRequestId, loading: true, error: null });
 
     try {
-      const { data } = await api.get<{ stats: AgentStats }>('/agents/stats');
+      const { data } = await api.get<{ stats: AgentStats }>('/aggregators/agents/stats');
       if (get().requestId === currentRequestId) {
         set({ stats: data.stats, loading: false });
       }

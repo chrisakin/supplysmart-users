@@ -10,6 +10,20 @@ const api = axios.create({
   },
 });
 
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 // Request interceptor for adding auth token
 api.interceptors.request.use(
   (config) => {
@@ -30,28 +44,52 @@ api.interceptors.response.use(
 
     // If error is 401 and we haven't tried to refresh the token yet
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If token refresh is in progress, add request to queue
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return axios(originalRequest);
+          })
+          .catch(err => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         const userType = localStorage.getItem('userType') as 'agent' | 'aggregator';
-        const response = await authApi.refreshToken(userType);
+        const refreshToken = localStorage.getItem('refreshToken');
         
-        const { token, refreshToken } = response.data;
+        if (!userType || !refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        const response = await authApi.refreshToken(userType);
+        const { token, refreshToken: newRefreshToken } = response.data;
         
         localStorage.setItem('token', token);
-        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('refreshToken', newRefreshToken);
         
         // Update auth store
-        useAuthStore.setState({ token, refreshToken });
+        useAuthStore.setState({ token, refreshToken: newRefreshToken });
         
-        // Retry the original request with new token
+        // Update authorization header
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         originalRequest.headers.Authorization = `Bearer ${token}`;
+        
+        processQueue(null, token);
         return axios(originalRequest);
       } catch (refreshError) {
-        // If refresh token fails, logout user
+        processQueue(refreshError, null);
+        // Clear auth state and redirect to login
         useAuthStore.getState().logout();
         window.location.href = '/';
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
@@ -61,10 +99,7 @@ api.interceptors.response.use(
       toast.error(errorMessage);
     }
 
-    // Always log the error to console
-    console.error('API Error:', error);
-
-    return Promise.reject(error.response?.data?.message || 'An error occurred');
+    return Promise.reject(error);
   }
 );
 
